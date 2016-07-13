@@ -1,38 +1,34 @@
 const Map = require('./map');
 
 class GameView {
-  constructor(root, game){
-    this.root = root;
-    this.game = game;
-    this.map = new Map();
+  constructor(canvas, map){
+    this.canvas = canvas;
+    this.ctx = canvas.getContext("2d");
+    this.map = new Map(canvas);
   }
 
-  textRender(){
-    this.root.innerHTML = this.map.render();
+  bindKeyHandlers() {}
+
+  start(){
+    //bind key handlers
+
+    //start animation
+    requestAnimationFrame(this.step.bind(this));
   }
-
-
-  // setupGrid() {
-  //   let html = "";
-  //
-  //   for (let i = 0; i < this.board.dim; i++) {
-  //     html += "<ul>";
-  //     for (let j = 0; j < this.board.dim; j++) {
-  //       html += "<li></li>";
-  //     }
-  //     html += "</ul>";
-  //   }
-  //
-  //   this.$el.html(html);
-  //   this.$li = this.$el.find("li");
-  // }
 
   step () {
-    // this.board.moveWaves();
-    this.textRender();
-      // window.clearInterval(this.intervalId);
+    this.map.step();
+    this.map.draw(this.ctx);
+
+    //request another animation
+    requestAnimationFrame(this.step.bind(this));
+
+    // when game is over
+    // window.clearInterval(this.intervalId);
   }
 
 };
+
+GameView.MOVES = {}
 
 module.exports = GameView;

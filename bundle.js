@@ -49,9 +49,15 @@
 	
 	document.addEventListener("DOMContentLoaded", ()=>{
 	  console.log("Hey there");
-	  const root = document.getElementById('root');
-	  const game = new Game();
-	  window.GameView = new GameView(root, game);
+	  const canvas = document.getElementById('canvas');
+	  canvas.width = 400;
+	  canvas.height = 400;
+	  ctx.fillStyle = "#222";
+	  ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+	
+	  const ctx = canvas.getContext("2d");
+	  const map = new Map();
+	  window.GameView = new GameView(canvas, map);
 	});
 
 
@@ -75,39 +81,35 @@
 	const Map = __webpack_require__(3);
 	
 	class GameView {
-	  constructor(root, game){
-	    this.root = root;
-	    this.game = game;
-	    this.map = new Map();
+	  constructor(canvas, map){
+	    this.canvas = canvas;
+	    this.ctx = canvas.getContext("2d");
+	    this.map = new Map(canvas);
 	  }
 	
-	  textRender(){
-	    this.root.innerHTML = this.map.render();
+	  bindKeyHandlers() {}
+	
+	  start(){
+	    //bind key handlers
+	
+	    //start animation
+	    requestAnimationFrame(this.step.bind(this));
 	  }
-	
-	
-	  // setupGrid() {
-	  //   let html = "";
-	  //
-	  //   for (let i = 0; i < this.board.dim; i++) {
-	  //     html += "<ul>";
-	  //     for (let j = 0; j < this.board.dim; j++) {
-	  //       html += "<li></li>";
-	  //     }
-	  //     html += "</ul>";
-	  //   }
-	  //
-	  //   this.$el.html(html);
-	  //   this.$li = this.$el.find("li");
-	  // }
 	
 	  step () {
-	    // this.board.moveWaves();
-	    this.textRender();
-	      // window.clearInterval(this.intervalId);
+	    this.map.step();
+	    this.map.draw(this.ctx);
+	
+	    //request another animation
+	    requestAnimationFrame(this.step.bind(this));
+	
+	    // when game is over
+	    // window.clearInterval(this.intervalId);
 	  }
 	
 	};
+	
+	GameView.MOVES = {}
 	
 	module.exports = GameView;
 
@@ -116,42 +118,39 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Wave = __webpack_require__(4);
+	const Ray = __webpack_require__(7);
+	const Util = __webpack_require__(6);
 	
 	class Map {
-	  constructor(){
-	    this.waves = [ new Wave(3, 3) ];
+	  constructor(canvas){
+	    const pegCoord = new Coord(3, 3);
+	    const dirCoord = new Coord(1, 2);
+	    const testRay = new Ray(pegCoord, dirCoord);
+	    this.rays = [ testRay ];
+	    this.walls = [];
+	    this.canvas = canvas;
 	  }
 	
-	  blankMap(){
-	    return (
-	      [
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "X", "__", "__", "__", "X", "__", "__"],
-	        ["__", "__", "__", "__", "__", "__", "__", "__"]
-	      ]
-	    );
+	  cullRays(){
+	    this.rays = this.rays.filter(ray => {
+	      return ray.age < 10;
+	    });
 	  }
 	
-	  isWall(coord) {
-	    return (this.grid[coord.y][coord.x] === "X");
+	  moveRays(){
+	    for (let ray of this.rays) {
+	      ray.move();
+	    }
 	  }
 	
-	  inBounds(coord) {
-	    return (coord.y >= 0) && (coord.y < this.grid.length)
-	        && (coord.x >= 0) && (coord.x < this.grid[0].length);
+	  step(){
+	    this.cullRays();
+	    this.moveRays();
 	  }
 	
-	  //simple text based render
-	  render(){
-	    const map = this.blankMap();
-	
-	    return map.map( row => row.join("")).join("</br>");
+	  draw(ctx){
+	    // draw objects
+	    // draw rays
 	  }
 	};
 	
@@ -159,45 +158,7 @@
 
 
 /***/ },
-/* 4 */
-/***/ function(module, exports, __webpack_require__) {
-
-	const Coord = __webpack_require__(5);
-	
-	class Wave {
-	  constructor(x, y){
-	    this.coord = new Coord(x, y);
-	    this.front = [ this.coord ];
-	    this.seen = [this.coord ];
-	    this.strength = 4;
-	  }
-	
-	  spread(){
-	    //breadth-first explore
-	    const newFront = [];
-	    this.front.forEach(coord => {
-	      coord.getAdjacentCoords().forEach(adjCoord => {
-	        if (
-	          this.seen.some( intCord => {
-	            return intCoord.equals(adjCoord);
-	          })
-	        ) {
-	          return;
-	        } else {
-	          this.newFront.push(adjCoord);
-	          this.seen.push(adjCoord);
-	        }
-	      });
-	    });
-	
-	    this.front = newFront;
-	  }
-	};
-	
-	module.exports = Wave;
-
-
-/***/ },
+/* 4 */,
 /* 5 */
 /***/ function(module, exports) {
 
@@ -233,6 +194,96 @@
 	];
 	
 	module.exports = Coord;
+
+
+/***/ },
+/* 6 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  inherits(Child, Parent) {
+	    function Surrogate (){};
+	    Surrogate.prototype = Parent.prototype;
+	    Child.prototype = new Surrogate();
+	    Child.prototype.constructor = Child;
+	  },
+	
+	  // inBounds(coord) {
+	  //   return (coord.y >= 0) && (coord.y < this.grid.length)
+	  //   && (coord.x >= 0) && (coord.x < this.grid[0].length);
+	  // }
+	
+	  // isWall(coord) {
+	  //   return (this.grid[coord.y][coord.x] === "X");
+	  // }
+	
+	}
+
+
+/***/ },
+/* 7 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Coord = __webpack_require__(5);
+	
+	class Ray {
+	  constructor(origin, direction){
+	    this.body = [this.origin];  //origin is coord object
+	    this.head = this.body[this.length - 1];
+	    this.tail = this.body[0];
+	    this.length = this.body.length;
+	
+	    this.direction = direction; //direction is coord object
+	    this.speed = Ray.VELOCITY;
+	
+	    this.age = 0;
+	  }
+	
+	  move(){
+	    // if not at max length, add head
+	    // if at max length, just shift off tail
+	    if (this.length < Ray.MAX_LENGTH) {
+	      const newX = this.head.x + (this.direction.x * this.speed);
+	      const newY = this.head.y + (this.direction.y * this.speed);
+	      this.body.push(Coord.new(newX, newY)); // collision logic could be added before this push
+	    } else {
+	      this.body.shift();
+	    }
+	
+	    this.age += 1;
+	  }
+	
+	  bounce(){
+	
+	  }
+	
+	  draw(ctx){
+	    ctx.lineWidth = 5;
+	
+	    // linear gradient from start to end of line
+	    const grad = ctx.createLinearGradient(
+	      this.head.x, this.head.y,
+	      this.tail.x, this.tail.y
+	    );
+	    grad.addColorStop(0, Ray.TAIL_COLOR);
+	    grad.addColorStop(1, Ray.HEAD_COLOR);
+	
+	    ctx.strokeStyle = grad;
+	
+	    ctx.beginPath();
+	    ctx.moveTo(this.head.x, this.head.y);
+	    ctx.lineTo(this.tail.x, this.tail.y);
+	
+	    ctx.stroke();
+	  }
+	};
+	
+	Ray.MAX_LENGTH = 400;
+	Ray.HEAD_COLOR = "#fff";
+	Ray.TAIL_COLOR = "#222";
+	Ray.VELOCITY = 0.5;
+	
+	module.exports = Ray;
 
 
 /***/ }

@@ -1,39 +1,36 @@
-const Wave = require('./wave');
+const Ray = require('./ray');
+const Util = require('./util');
 
 class Map {
-  constructor(){
-    this.waves = [ new Wave(3, 3) ];
+  constructor(canvas){
+    const pegCoord = new Coord(3, 3);
+    const dirCoord = new Coord(1, 2);
+    const testRay = new Ray(pegCoord, dirCoord);
+    this.rays = [ testRay ];
+    this.walls = [];
+    this.canvas = canvas;
   }
 
-  blankMap(){
-    return (
-      [
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "X", "__", "__", "__", "X", "__", "__"],
-        ["__", "__", "__", "__", "__", "__", "__", "__"]
-      ]
-    );
+  cullRays(){
+    this.rays = this.rays.filter(ray => {
+      return ray.age < 10;
+    });
   }
 
-  isWall(coord) {
-    return (this.grid[coord.y][coord.x] === "X");
+  moveRays(){
+    for (let ray of this.rays) {
+      ray.move();
+    }
   }
 
-  inBounds(coord) {
-    return (coord.y >= 0) && (coord.y < this.grid.length)
-        && (coord.x >= 0) && (coord.x < this.grid[0].length);
+  step(){
+    this.cullRays();
+    this.moveRays();
   }
 
-  //simple text based render
-  render(){
-    const map = this.blankMap();
-
-    return map.map( row => row.join("")).join("</br>");
+  draw(ctx){
+    // draw objects
+    // draw rays
   }
 };
 
