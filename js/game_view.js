@@ -17,6 +17,9 @@ class GameView {
   }
 
   step () {
+    this.ctx.fillStyle = "#222";
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+
     this.map.step();
     this.map.draw(this.ctx);
 

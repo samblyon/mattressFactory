@@ -6,10 +6,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
   const canvas = document.getElementById('canvas');
   canvas.width = 400;
   canvas.height = 400;
-  ctx.fillStyle = "#222";
-  ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
   const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#222";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
   const map = new Map();
   window.GameView = new GameView(canvas, map);
 });

@@ -1,3 +1,4 @@
+const Coord = require('./coord');
 const Ray = require('./ray');
 const Util = require('./util');
 
@@ -5,15 +6,15 @@ class Map {
   constructor(canvas){
     const pegCoord = new Coord(3, 3);
     const dirCoord = new Coord(1, 2);
-    const testRay = new Ray(pegCoord, dirCoord);
-    this.rays = [ testRay ];
+    const testRay = new Ray(pegCoord, dirCoord, this);
+    window.rays = this.rays = [ testRay ];
     this.walls = [];
     this.canvas = canvas;
   }
 
   cullRays(){
     this.rays = this.rays.filter(ray => {
-      return ray.age < 10;
+      return ray.age < Ray.LIFESPAN;
     });
   }
 
@@ -29,7 +30,7 @@ class Map {
   }
 
   draw(ctx){
-    // draw objects
+    this.rays.forEach(ray => ray.draw(ctx));
     // draw rays
   }
 };
