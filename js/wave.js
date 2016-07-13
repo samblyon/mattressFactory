@@ -16,7 +16,7 @@ class Wave {
         if (
           this.seen.some( intCord => {
             return intCoord.equals(adjCoord);
-          });
+          })
         ) {
           return;
         } else {
@@ -28,6 +28,6 @@ class Wave {
 
     this.front = newFront;
   }
-}; //sdsd
+};
 
 module.exports = Wave;
