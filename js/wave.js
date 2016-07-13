@@ -13,7 +13,11 @@ class Wave {
     const newFront = [];
     this.front.forEach(coord => {
       coord.getAdjacentCoords().forEach(adjCoord => {
-        if (this.seen.some(intCoord.equals(adjCoord))) {
+        if (
+          this.seen.some( intCord => {
+            return intCoord.equals(adjCoord);
+          });
+        ) {
           return;
         } else {
           this.newFront.push(adjCoord);
@@ -24,6 +28,6 @@ class Wave {
 
     this.front = newFront;
   }
-};
+}; //sdsd
 
 module.exports = Wave;
