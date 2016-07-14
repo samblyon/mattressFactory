@@ -6,7 +6,6 @@ class GameView {
     this.ctx = canvas.getContext("2d");
     this.map = new Map(canvas);
     this.player = this.map.player;
-    this.bindKeyHandlers();
   }
 
   bindKeyHandlers() {
@@ -22,6 +21,7 @@ class GameView {
 
   start(){
     //bind key handlers
+    this.bindKeyHandlers();
 
     //start animation
     requestAnimationFrame(this.step.bind(this));

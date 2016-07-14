@@ -10,17 +10,17 @@ class Ray {
     this.direction = direction; //direction is coord object
     this.speed = Ray.VELOCITY;
 
-    this.age = (age) ? age : 0;
-    this.maxLength = (maxLength) ? maxLength : Ray.MAX_LENGTH;
+    this.age = (age) ? age : Math.random(20);
+    this.maxLength =  Ray.MAX_LENGTH + Math.random(20); //(maxLength) ? maxLength :
     this.fading = false;
   }
 
   move(){
-    if (this.age < (Ray.LIFESPAN - 60)) {
+    // if (this.age < (Ray.LIFESPAN - 60)) {
       if (this.handleCollisions() === false){
         this.growHead();
       }
-    }
+    // }
 
     if (this.body.length > this.maxLength){
       this.fading = true;
@@ -115,7 +115,12 @@ class Ray {
       this.head.x, this.head.y,
       this.tail.x, this.tail.y
     );
-    grad.addColorStop(0, Ray.HEAD_COLOR);
+
+    let headColor = Ray.HEAD_COLOR;
+    if (this.age > Ray.LIFESPAN - 100) { headColor = Ray.FADING_HEAD_COLOR; }
+    if (this.age > Ray.LIFESPAN - 20) { headColor = Ray.FADED_HEAD_COLOR; }
+
+    grad.addColorStop(0, headColor);
     grad.addColorStop(1, Ray.TAIL_COLOR);
 
     ctx.strokeStyle = grad;
@@ -128,23 +133,40 @@ class Ray {
   }
 };
 
-Ray.MAX_LENGTH = 40;
+Ray.MAX_LENGTH = 60;
 Ray.HEAD_COLOR = "#fff";
+Ray.FADING_HEAD_COLOR = "#aaa";
+Ray.FADED_HEAD_COLOR = "#7f7f7f";
 Ray.TAIL_COLOR = "#222";
-Ray.VELOCITY = 1;
+Ray.VELOCITY = 1.5;
 Ray.LIFESPAN = 200;
 Ray.THICKNESS = 1;
 
-const rtTwo = Math.sqrt(2)/2;
+const rt3oTwo = Math.sqrt(3)/2;
+const cos15 = Math.cos((15/180) * Math.PI);
+const sin15 = Math.sin((15/180) * Math.PI);
 Ray.DIRECTIONS = [
-  [0, rtTwo],
-  [0, -rtTwo],
-  [-rtTwo, 0],
-  [rtTwo, 0],
-  [rtTwo, rtTwo],
-  [rtTwo, -rtTwo],
-  [-rtTwo, rtTwo],
-  [-rtTwo, -rtTwo]
+  [0, 1],
+  [0, -1],
+  [-1, 0],
+  [1, 0],
+  [1/2, rt3oTwo],
+  [1/2, -rt3oTwo],
+  [-1/2, rt3oTwo],
+  [-1/2, -rt3oTwo],
+  [rt3oTwo, 1/2],
+  [-rt3oTwo, 1/2],
+  [rt3oTwo, -1/2],
+  [-rt3oTwo, -1/2],
+  [cos15,sin15],
+  [-cos15,sin15],
+  [cos15,-sin15],
+  [-cos15,-sin15],
+  [sin15,cos15],
+  [-sin15,cos15],
+  [sin15,-cos15],
+  [-sin15,-cos15],
+
 ];
 
 
