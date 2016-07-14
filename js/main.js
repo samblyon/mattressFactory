@@ -13,4 +13,5 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
   const map = new Map();
   window.GameView = new GameView(canvas, map);
+  window.GameView.start();
 });

@@ -5,9 +5,20 @@ class GameView {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
     this.map = new Map(canvas);
+    this.player = this.map.player;
+    this.bindKeyHandlers();
   }
 
-  bindKeyHandlers() {}
+  bindKeyHandlers() {
+    const player = this.player;
+
+    Object.keys(GameView.MOVES).forEach((k) => {
+      let dir = GameView.MOVES[k];
+      key(k, function () { player.move(dir); });
+    });
+
+    key("space", function () { player.emitRays() });
+  }
 
   start(){
     //bind key handlers
@@ -32,6 +43,11 @@ class GameView {
 
 };
 
-GameView.MOVES = {}
+GameView.MOVES = {
+  "up": "U",
+  "down": "D",
+  "left": "L",
+  "right": "R"
+}
 
 module.exports = GameView;

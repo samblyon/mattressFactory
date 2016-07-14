@@ -59,6 +59,7 @@
 	
 	  const map = new Map();
 	  window.GameView = new GameView(canvas, map);
+	  window.GameView.start();
 	});
 
 
@@ -86,9 +87,20 @@
 	    this.canvas = canvas;
 	    this.ctx = canvas.getContext("2d");
 	    this.map = new Map(canvas);
+	    this.player = this.map.player;
+	    this.bindKeyHandlers();
 	  }
 	
-	  bindKeyHandlers() {}
+	  bindKeyHandlers() {
+	    const player = this.player;
+	
+	    Object.keys(GameView.MOVES).forEach((k) => {
+	      let dir = GameView.MOVES[k];
+	      key(k, function () { player.move(dir); });
+	    });
+	
+	    key("space", function () { player.emitRays() });
+	  }
 	
 	  start(){
 	    //bind key handlers
@@ -113,7 +125,12 @@
 	
 	};
 	
-	GameView.MOVES = {}
+	GameView.MOVES = {
+	  "up": "U",
+	  "down": "D",
+	  "left": "L",
+	  "right": "R"
+	}
 	
 	module.exports = GameView;
 
@@ -126,16 +143,16 @@
 	const Ray = __webpack_require__(7);
 	const Util = __webpack_require__(6);
 	const Wall = __webpack_require__(8);
+	const Player = __webpack_require__(9);
 	
 	class Map {
 	  constructor(canvas){
-	    const pegCoord = new Coord(3, 3);
+	    const pegCoord = new Coord(20, 20);
 	    const dirCoord = new Coord(1, 2);
 	    const testRay = new Ray(pegCoord, dirCoord, this);
-	    window.rays = this.rays = [ testRay ];
-	    // const testWall = new Wall(10, 10, 20, 100);
-	    const testWall2 = new Wall(50, 200, 200, 210);
-	    window.walls = this.walls = [ testWall2 ];
+	    this.rays = [];
+	    this.walls = Map.LEVELS[1].map(info => new Wall(...info));
+	    window.player = this.player = new Player(20, 20, this);
 	    this.canvas = canvas;
 	  }
 	
@@ -168,10 +185,25 @@
 	  }
 	
 	  draw(ctx){
+	    this.player.draw(ctx);
 	    this.rays.forEach(ray => ray.draw(ctx));
 	    this.walls.forEach(wall => wall.draw(ctx)); //remove this on release
 	  }
 	};
+	
+	Map.LEVELS = {
+	  1: [
+	      [1, 1, 10, 399],
+	      [1, 1, 399, 10],
+	      [390, 1, 399, 399],
+	      [1, 390, 370, 399],
+	      [50, 200, 200, 210],
+	      [100, 100, 110, 200],
+	      [200, 40, 210, 100],
+	      [200, 60, 320, 70],
+	      [260, 70, 270, 300]
+	    ]
+	}
 	
 	module.exports = Map;
 
@@ -344,6 +376,21 @@
 	Ray.VELOCITY = 1;
 	Ray.LIFESPAN = 200;
 	Ray.THICKNESS = 1;
+	Ray.DIRECTIONS = [
+	  [0, 1],
+	  [0, -1],
+	  [1, 0],
+	  [-1, 0],
+	  [1, 1],
+	  [1, -1],
+	  [Math.sqrt(2)/2, Math.sqrt(2)/2],
+	  [Math.sqrt(2)/2, -Math.sqrt(2)/2],
+	  [-Math.sqrt(2)/2, Math.sqrt(2)/2],
+	  [-Math.sqrt(2)/2, -Math.sqrt(2)/2],
+	  [-1, 1],
+	  [-1, -1]
+	];
+	
 	
 	module.exports = Ray;
 
@@ -369,6 +416,56 @@
 	}
 	
 	module.exports = Wall;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Coord = __webpack_require__(5);
+	const Ray = __webpack_require__(7);
+	
+	class Player {
+	  constructor(startX, startY, map){
+	    this.pos = new Coord(startX, startY);
+	    this.map = map;
+	  }
+	
+	  move(direction){
+	    const newX = this.pos.x + (Player.MOVES[direction][0] * Player.SPEED)
+	    const newY = this.pos.y + (Player.MOVES[direction][1] * Player.SPEED)
+	    const exploreCoord = new Coord(newX, newY);
+	
+	    if (this.map.collidingWithWall(exploreCoord)) return;
+	    this.pos = exploreCoord;
+	    this.emitRays();
+	  }
+	
+	  emitRays(){
+	    const newRays = Ray.DIRECTIONS.map(dir => {
+	      let dirVector = new Coord(dir[0], dir[1]);
+	      return new Ray(this.pos, dirVector, this.map);
+	    });
+	    newRays.forEach( ray => {
+	      this.map.rays.push(ray);
+	    });
+	  }
+	
+	  draw(ctx){
+	    ctx.fillStyle = "#fff";
+	    ctx.fillRect(this.pos.x, this.pos.y, 4, 4);
+	  }
+	};
+	
+	Player.SPEED = 5;
+	Player.MOVES = {
+	  "U": [0, -1],
+	  "D": [0, 1],
+	  "L": [-1, 0],
+	  "R": [1, 0]
+	}
+	
+	module.exports = Player;
 
 
 /***/ }
