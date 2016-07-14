@@ -48,19 +48,25 @@
 	const GameView = __webpack_require__(2);
 	
 	document.addEventListener("DOMContentLoaded", ()=>{
-	  console.log("Hey there");
+	  console.log("Hey there and welcome to Mattress Factory Escape");
+	  document.addEventListener("keydown", hideSplash);
+	
 	  const canvas = document.getElementById('canvas');
 	  canvas.width = window.innerWidth - 20;
 	  canvas.height = window.innerHeight - 20;
-	
 	  const ctx = canvas.getContext("2d");
 	  ctx.fillStyle = "#222";
 	  ctx.fillRect(0, 0, canvas.width, canvas.height);
+	});
 	
+	function hideSplash(){
+	  const splash = document.getElementById('splash');
+	  splash.style.visibility = "hidden";
 	  const map = new Map();
 	  window.GameView = new GameView(canvas, map);
 	  window.GameView.start();
-	});
+	  document.removeEventListener("keydown", hideSplash);
+	}
 
 
 /***/ },
@@ -91,25 +97,52 @@
 	  }
 	
 	  bindKeyHandlers() {
-	    const player = this.player;
-	
-	    Object.keys(GameView.MOVES).forEach((k) => {
-	      let dir = GameView.MOVES[k];
-	      key(k, function () { player.move(dir); });
+	    window.addEventListener("keydown", (e) => {
+	      console.log("keydown");
+	      GameView.KEYS[e.keyCode] = true;
 	    });
 	
-	    key("space", function () { player.emitRays() });
+	    window.addEventListener("keyup", (e) => {
+	      console.log("keyup");
+	      GameView.KEYS[e.keyCode] = false;
+	    });
+	
+	    window.addEventListener("keydown", (e)=>{
+	      if (e.keyCode === 32) { player.emitRays(); }
+	    });
+	  }
+	
+	  whatKey(){
+	    const player = this.player;
+	    if (GameView.KEYS[37] && GameView.KEYS[38]) {
+	      player.move("UL");
+	    } else if (GameView.KEYS[37] && GameView.KEYS[40]){
+	      player.move("DL")
+	    } else if (GameView.KEYS[39] && GameView.KEYS[38]){
+	      player.move("UR");
+	    } else if (GameView.KEYS[39] && GameView.KEYS[40]){
+	      player.move("DR");
+	    } else if (GameView.KEYS[37]) {
+	      player.move("L");
+	    } else if (GameView.KEYS[39]) {
+	      player.move("R");
+	    } else if (GameView.KEYS[38]) {
+	      player.move("U");
+	    } else if (GameView.KEYS[40]) {
+	      player.move("D");
+	    }
 	  }
 	
 	  start(){
 	    //bind key handlers
 	    this.bindKeyHandlers();
-	
+	    this.whatKey();
 	    //start animation
 	    requestAnimationFrame(this.step.bind(this));
 	  }
 	
 	  step () {
+	    this.whatKey();
 	    this.ctx.fillStyle = "#222";
 	    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 	
@@ -125,12 +158,14 @@
 	
 	};
 	
+	GameView.KEYS = {};
+	
 	GameView.MOVES = {
 	  "up": "U",
 	  "down": "D",
 	  "left": "L",
 	  "right": "R"
-	}
+	};
 	
 	module.exports = GameView;
 
@@ -191,11 +226,12 @@
 	  }
 	};
 	
+	//make relative sizes so can scale
 	Map.LEVELS = {
 	  1: [
-	      [1, 1, 10, 399],
-	      [1, 1, 399, 10],
-	      [390, 1, 399, 399],
+	      [0, 0, 1, .05],
+	      [0, 0, .05, 1],
+	      [.95, 0, 1, 1],
 	      [1, 390, 370, 399],
 	      [50, 200, 200, 210],
 	      [100, 100, 110, 200],
@@ -492,7 +528,7 @@
 	
 	    if (this.map.collidingWithWall(exploreCoord)) return;
 	    this.pos = exploreCoord;
-	    this.emitRays();
+	    // this.emitRays();
 	  }
 	
 	  emitRays(){
@@ -511,12 +547,18 @@
 	  }
 	};
 	
+	const rt2oTwo = Math.sqrt(2)/2;
+	
 	Player.SPEED = 5;
 	Player.MOVES = {
 	  "U": [0, -1],
 	  "D": [0, 1],
+	  "UL": [-rt2oTwo, -rt2oTwo],
+	  "DL": [-rt2oTwo, rt2oTwo],
 	  "L": [-1, 0],
-	  "R": [1, 0]
+	  "R": [1, 0],
+	  "UR": [rt2oTwo, -rt2oTwo],
+	  "DR": [rt2oTwo, rt2oTwo]
 	}
 	
 	module.exports = Player;
