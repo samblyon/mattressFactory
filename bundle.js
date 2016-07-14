@@ -377,18 +377,14 @@
 	Ray.LIFESPAN = 200;
 	Ray.THICKNESS = 1;
 	Ray.DIRECTIONS = [
-	  [0, 1],
-	  [0, -1],
-	  [1, 0],
-	  [-1, 0],
-	  [1, 1],
-	  [1, -1],
+	  [0, Math.sqrt(2)/2],
+	  [0, -Math.sqrt(2)/2],
+	  [Math.sqrt(2)/2, 0],
+	  [-Math.sqrt(2)/2, 0],
 	  [Math.sqrt(2)/2, Math.sqrt(2)/2],
 	  [Math.sqrt(2)/2, -Math.sqrt(2)/2],
 	  [-Math.sqrt(2)/2, Math.sqrt(2)/2],
-	  [-Math.sqrt(2)/2, -Math.sqrt(2)/2],
-	  [-1, 1],
-	  [-1, -1]
+	  [-Math.sqrt(2)/2, -Math.sqrt(2)/2]
 	];
 	
 	
@@ -410,7 +406,7 @@
 	  }
 	
 	  draw(ctx){
-	    ctx.fillStyle = "white";
+	    ctx.fillStyle = "#222";
 	    ctx.fillRect(this.topLeft.x, this.topLeft.y, this.width, this.height);
 	  }
 	}
