@@ -9,7 +9,7 @@ class Map {
     const pegCoord = new Coord(20, 20);
     const dirCoord = new Coord(1, 2);
     const testRay = new Ray(pegCoord, dirCoord, this);
-    this.rays = [];
+    window.rays = this.rays = [];
     this.walls = Map.LEVELS[1].map(info => new Wall(...info));
     window.player = this.player = new Player(20, 20, this);
     this.canvas = canvas;

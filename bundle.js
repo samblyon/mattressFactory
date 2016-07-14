@@ -139,18 +139,18 @@
 /* 3 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Coord = __webpack_require__(5);
-	const Ray = __webpack_require__(7);
+	const Coord = __webpack_require__(4);
+	const Ray = __webpack_require__(5);
 	const Util = __webpack_require__(6);
-	const Wall = __webpack_require__(8);
-	const Player = __webpack_require__(9);
+	const Wall = __webpack_require__(7);
+	const Player = __webpack_require__(8);
 	
 	class Map {
 	  constructor(canvas){
 	    const pegCoord = new Coord(20, 20);
 	    const dirCoord = new Coord(1, 2);
 	    const testRay = new Ray(pegCoord, dirCoord, this);
-	    this.rays = [];
+	    window.rays = this.rays = [];
 	    this.walls = Map.LEVELS[1].map(info => new Wall(...info));
 	    window.player = this.player = new Player(20, 20, this);
 	    this.canvas = canvas;
@@ -209,8 +209,7 @@
 
 
 /***/ },
-/* 4 */,
-/* 5 */
+/* 4 */
 /***/ function(module, exports) {
 
 	class Coord {
@@ -248,37 +247,13 @@
 
 
 /***/ },
-/* 6 */
-/***/ function(module, exports) {
-
-	module.exports = {
-	  inherits(Child, Parent) {
-	    function Surrogate (){};
-	    Surrogate.prototype = Parent.prototype;
-	    Child.prototype = new Surrogate();
-	    Child.prototype.constructor = Child;
-	  },
-	
-	  // inBounds(coord) {
-	  //   return (coord.y >= 0) && (coord.y < this.grid.length)
-	  //   && (coord.x >= 0) && (coord.x < this.grid[0].length);
-	  // }
-	
-	  // isWall(coord) {
-	  //   return (this.grid[coord.y][coord.x] === "X");
-	  // }
-	
-	}
-
-
-/***/ },
-/* 7 */
+/* 5 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Coord = __webpack_require__(5);
+	const Coord = __webpack_require__(4);
 	
 	class Ray {
-	  constructor(origin, direction, map){
+	  constructor(origin, direction, map, age, maxLength){
 	    this.body = [origin];  //origin is coord object
 	    this.head = origin;
 	    this.tail = origin;
@@ -287,17 +262,19 @@
 	    this.direction = direction; //direction is coord object
 	    this.speed = Ray.VELOCITY;
 	
-	    this.age = 0;
+	    this.age = (age) ? age : 0;
+	    this.maxLength = (maxLength) ? maxLength : Ray.MAX_LENGTH;
 	    this.fading = false;
 	  }
 	
 	  move(){
 	    if (this.age < (Ray.LIFESPAN - 60)) {
-	      this.handleCollisions();
-	      this.growHead();
+	      if (this.handleCollisions() === false){
+	        this.growHead();
+	      }
 	    }
 	
-	    if (this.body.length > Ray.MAX_LENGTH){
+	    if (this.body.length > this.maxLength){
 	      this.fading = true;
 	    }
 	
@@ -320,9 +297,42 @@
 	    const yExplorer = new Coord(this.head.x, newY);
 	    const yCollision = this.map.collidingWithWall(yExplorer);
 	
-	    if (xCollision || yCollision) {
-	      this.direction.x = 0;    // NOTE do -this.direction.x; //-this.direction.y; later
+	    const zExplorer = new Coord(newX, newY);
+	    const zCollision = this.map.collidingWithWall(zExplorer);
+	
+	    if (xCollision || yCollision || zCollision) {
+	      // generate reflected ray
+	
+	      // reflect direction based on collision
+	      const reflectionDirection = new Coord(this.direction.x, this.direction.y);
+	      if (xCollision) {
+	        reflectionDirection.x = -reflectionDirection.x;
+	      } else if (yCollision) {
+	        reflectionDirection.y = -reflectionDirection.y;
+	      } else {
+	        reflectionDirection.y = -reflectionDirection.y;
+	        reflectionDirection.x = -reflectionDirection.x;
+	      }
+	
+	      const origin = new Coord(this.head.x, this.head.y);
+	      const reflection = new Ray(
+	        origin,
+	        reflectionDirection,
+	        this.map,
+	        this.age,        // advance new ray age to parent ray current age
+	        this.body.length // set new ray max length
+	      );
+	
+	      this.map.rays.push(reflection);
+	      console.log(this.map.rays.length);
+	
+	      // stop expansion of current ray
+	      this.direction.x = 0;
 	      this.direction.y = 0;
+	
+	      return true;
+	    } else {
+	      return false;
 	    }
 	  }
 	
@@ -376,15 +386,17 @@
 	Ray.VELOCITY = 1;
 	Ray.LIFESPAN = 200;
 	Ray.THICKNESS = 1;
+	
+	const rtTwo = Math.sqrt(2)/2;
 	Ray.DIRECTIONS = [
-	  [0, Math.sqrt(2)/2],
-	  [0, -Math.sqrt(2)/2],
-	  [Math.sqrt(2)/2, 0],
-	  [-Math.sqrt(2)/2, 0],
-	  [Math.sqrt(2)/2, Math.sqrt(2)/2],
-	  [Math.sqrt(2)/2, -Math.sqrt(2)/2],
-	  [-Math.sqrt(2)/2, Math.sqrt(2)/2],
-	  [-Math.sqrt(2)/2, -Math.sqrt(2)/2]
+	  [0, rtTwo],
+	  [0, -rtTwo],
+	  [-rtTwo, 0],
+	  [rtTwo, 0],
+	  [rtTwo, rtTwo],
+	  [rtTwo, -rtTwo],
+	  [-rtTwo, rtTwo],
+	  [-rtTwo, -rtTwo]
 	];
 	
 	
@@ -392,10 +404,34 @@
 
 
 /***/ },
-/* 8 */
+/* 6 */
+/***/ function(module, exports) {
+
+	module.exports = {
+	  inherits(Child, Parent) {
+	    function Surrogate (){};
+	    Surrogate.prototype = Parent.prototype;
+	    Child.prototype = new Surrogate();
+	    Child.prototype.constructor = Child;
+	  },
+	
+	  // inBounds(coord) {
+	  //   return (coord.y >= 0) && (coord.y < this.grid.length)
+	  //   && (coord.x >= 0) && (coord.x < this.grid[0].length);
+	  // }
+	
+	  // isWall(coord) {
+	  //   return (this.grid[coord.y][coord.x] === "X");
+	  // }
+	
+	}
+
+
+/***/ },
+/* 7 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Coord = __webpack_require__(5);
+	const Coord = __webpack_require__(4);
 	
 	class Wall {
 	  constructor(topX, topY, bottomX, bottomY){
@@ -415,11 +451,11 @@
 
 
 /***/ },
-/* 9 */
+/* 8 */
 /***/ function(module, exports, __webpack_require__) {
 
-	const Coord = __webpack_require__(5);
-	const Ray = __webpack_require__(7);
+	const Coord = __webpack_require__(4);
+	const Ray = __webpack_require__(5);
 	
 	class Player {
 	  constructor(startX, startY, map){

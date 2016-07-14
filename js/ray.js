@@ -1,7 +1,7 @@
 const Coord = require('./coord');
 
 class Ray {
-  constructor(origin, direction, map){
+  constructor(origin, direction, map, age, maxLength){
     this.body = [origin];  //origin is coord object
     this.head = origin;
     this.tail = origin;
@@ -10,17 +10,19 @@ class Ray {
     this.direction = direction; //direction is coord object
     this.speed = Ray.VELOCITY;
 
-    this.age = 0;
+    this.age = (age) ? age : 0;
+    this.maxLength = (maxLength) ? maxLength : Ray.MAX_LENGTH;
     this.fading = false;
   }
 
   move(){
     if (this.age < (Ray.LIFESPAN - 60)) {
-      this.handleCollisions();
-      this.growHead();
+      if (this.handleCollisions() === false){
+        this.growHead();
+      }
     }
 
-    if (this.body.length > Ray.MAX_LENGTH){
+    if (this.body.length > this.maxLength){
       this.fading = true;
     }
 
@@ -43,9 +45,42 @@ class Ray {
     const yExplorer = new Coord(this.head.x, newY);
     const yCollision = this.map.collidingWithWall(yExplorer);
 
-    if (xCollision || yCollision) {
-      this.direction.x = 0;    // NOTE do -this.direction.x; //-this.direction.y; later
+    const zExplorer = new Coord(newX, newY);
+    const zCollision = this.map.collidingWithWall(zExplorer);
+
+    if (xCollision || yCollision || zCollision) {
+      // generate reflected ray
+
+      // reflect direction based on collision
+      const reflectionDirection = new Coord(this.direction.x, this.direction.y);
+      if (xCollision) {
+        reflectionDirection.x = -reflectionDirection.x;
+      } else if (yCollision) {
+        reflectionDirection.y = -reflectionDirection.y;
+      } else {
+        reflectionDirection.y = -reflectionDirection.y;
+        reflectionDirection.x = -reflectionDirection.x;
+      }
+
+      const origin = new Coord(this.head.x, this.head.y);
+      const reflection = new Ray(
+        origin,
+        reflectionDirection,
+        this.map,
+        this.age,        // advance new ray age to parent ray current age
+        this.body.length // set new ray max length
+      );
+
+      this.map.rays.push(reflection);
+      console.log(this.map.rays.length);
+
+      // stop expansion of current ray
+      this.direction.x = 0;
       this.direction.y = 0;
+
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -99,15 +134,17 @@ Ray.TAIL_COLOR = "#222";
 Ray.VELOCITY = 1;
 Ray.LIFESPAN = 200;
 Ray.THICKNESS = 1;
+
+const rtTwo = Math.sqrt(2)/2;
 Ray.DIRECTIONS = [
-  [0, Math.sqrt(2)/2],
-  [0, -Math.sqrt(2)/2],
-  [Math.sqrt(2)/2, 0],
-  [-Math.sqrt(2)/2, 0],
-  [Math.sqrt(2)/2, Math.sqrt(2)/2],
-  [Math.sqrt(2)/2, -Math.sqrt(2)/2],
-  [-Math.sqrt(2)/2, Math.sqrt(2)/2],
-  [-Math.sqrt(2)/2, -Math.sqrt(2)/2]
+  [0, rtTwo],
+  [0, -rtTwo],
+  [-rtTwo, 0],
+  [rtTwo, 0],
+  [rtTwo, rtTwo],
+  [rtTwo, -rtTwo],
+  [-rtTwo, rtTwo],
+  [-rtTwo, -rtTwo]
 ];
 
 
