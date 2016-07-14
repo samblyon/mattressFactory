@@ -1,7 +1,16 @@
+const Coord = require('./coord');
+
 class Wall {
-  constructor(topLeft, bottomRight){
-    this.topLeft = topLeft;
-    this.bottomRight = bottomRight;
+  constructor(topX, topY, bottomX, bottomY){
+    this.topLeft = new Coord(topX, topY);
+    this.bottomRight = new Coord(bottomX, bottomY);
+    this.width = bottomX - topX;
+    this.height = bottomY - topY;
+  }
+
+  draw(ctx){
+    ctx.fillStyle = "white";
+    ctx.fillRect(this.topLeft.x, this.topLeft.y, this.width, this.height);
   }
 }
 

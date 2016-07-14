@@ -31,10 +31,22 @@ class Ray {
     this.age += 1;
   }
 
+  // move head x and ask map if collided with wall
+  // move head y and ask map if collided with wall
+  // alter this.direction coord to reflect one or both bounces as needed
   handleCollisions(){
-    // move head x and ask map if collided with wall
-    // move head y and ask map if collided with wall
-    // alter this.direction coord to reflect one or both bounces as needed
+    const newX = this.head.x + (this.direction.x * this.speed);
+    const xExplorer = new Coord(newX, this.head.y);
+    const xCollision = this.map.collidingWithWall(xExplorer);
+
+    const newY = this.head.y + (this.direction.y * this.speed);
+    const yExplorer = new Coord(this.head.x, newY);
+    const yCollision = this.map.collidingWithWall(yExplorer);
+
+    if (xCollision || yCollision) {
+      this.direction.x = 0;    // NOTE do -this.direction.x; //-this.direction.y; later
+      this.direction.y = 0;
+    }
   }
 
   growHead(){

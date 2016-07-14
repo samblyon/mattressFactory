@@ -125,6 +125,7 @@
 	const Coord = __webpack_require__(5);
 	const Ray = __webpack_require__(7);
 	const Util = __webpack_require__(6);
+	const Wall = __webpack_require__(8);
 	
 	class Map {
 	  constructor(canvas){
@@ -132,8 +133,21 @@
 	    const dirCoord = new Coord(1, 2);
 	    const testRay = new Ray(pegCoord, dirCoord, this);
 	    window.rays = this.rays = [ testRay ];
-	    this.walls = [];
+	    // const testWall = new Wall(10, 10, 20, 100);
+	    const testWall2 = new Wall(50, 200, 200, 210);
+	    window.walls = this.walls = [ testWall2 ];
 	    this.canvas = canvas;
+	  }
+	
+	  collidingWithWall(coord){
+	    return this.walls.some( wall => {
+	      return !(
+	        (coord.x < wall.topLeft.x)
+	          || (coord.x > wall.bottomRight.x)
+	          || (coord.y < wall.topLeft.y)
+	          || (coord.y > wall.bottomRight.y)
+	      );
+	    });
 	  }
 	
 	  cullRays(){
@@ -155,7 +169,7 @@
 	
 	  draw(ctx){
 	    this.rays.forEach(ray => ray.draw(ctx));
-	    // draw rays
+	    this.walls.forEach(wall => wall.draw(ctx)); //remove this on release
 	  }
 	};
 	
@@ -262,10 +276,22 @@
 	    this.age += 1;
 	  }
 	
+	  // move head x and ask map if collided with wall
+	  // move head y and ask map if collided with wall
+	  // alter this.direction coord to reflect one or both bounces as needed
 	  handleCollisions(){
-	    // move head x and ask map if collided with wall
-	    // move head y and ask map if collided with wall
-	    // alter this.direction coord to reflect one or both bounces as needed
+	    const newX = this.head.x + (this.direction.x * this.speed);
+	    const xExplorer = new Coord(newX, this.head.y);
+	    const xCollision = this.map.collidingWithWall(xExplorer);
+	
+	    const newY = this.head.y + (this.direction.y * this.speed);
+	    const yExplorer = new Coord(this.head.x, newY);
+	    const yCollision = this.map.collidingWithWall(yExplorer);
+	
+	    if (xCollision || yCollision) {
+	      this.direction.x = 0;    // NOTE do -this.direction.x; //-this.direction.y; later
+	      this.direction.y = 0;
+	    }
 	  }
 	
 	  growHead(){
@@ -320,6 +346,29 @@
 	Ray.THICKNESS = 1;
 	
 	module.exports = Ray;
+
+
+/***/ },
+/* 8 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Coord = __webpack_require__(5);
+	
+	class Wall {
+	  constructor(topX, topY, bottomX, bottomY){
+	    this.topLeft = new Coord(topX, topY);
+	    this.bottomRight = new Coord(bottomX, bottomY);
+	    this.width = bottomX - topX;
+	    this.height = bottomY - topY;
+	  }
+	
+	  draw(ctx){
+	    ctx.fillStyle = "white";
+	    ctx.fillRect(this.topLeft.x, this.topLeft.y, this.width, this.height);
+	  }
+	}
+	
+	module.exports = Wall;
 
 
 /***/ }
