@@ -74,7 +74,7 @@ class Ray {
       reflection.monster = this.monster;
 
       this.map.rays.push(reflection);
-      console.log(this.map.rays.length);
+      // console.log(this.map.rays.length);
 
       // stop expansion of current ray
       this.direction.x = 0;
