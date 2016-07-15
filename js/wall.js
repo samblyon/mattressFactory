@@ -9,7 +9,7 @@ class Wall {
   }
 
   draw(ctx){
-    ctx.fillStyle = "#222";
+    ctx.fillStyle = "#222"; 
     ctx.fillRect(this.topLeft.x, this.topLeft.y, this.width, this.height);
   }
 }

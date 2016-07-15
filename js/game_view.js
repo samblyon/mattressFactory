@@ -1,26 +1,26 @@
 const Map = require('./map');
 
 class GameView {
-  constructor(canvas, map){
+  constructor(canvas, passCallback, losingCallback, winningCallback, level){
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    this.map = new Map(canvas);
+    this.map = new Map(canvas, level);
     this.player = this.map.player;
+    this.winningCallback = winningCallback;
+    this.losingCallback = losingCallback;
   }
 
   bindKeyHandlers() {
     window.addEventListener("keydown", (e) => {
-      console.log("keydown");
       GameView.KEYS[e.keyCode] = true;
     });
 
     window.addEventListener("keyup", (e) => {
-      console.log("keyup");
       GameView.KEYS[e.keyCode] = false;
     });
 
     window.addEventListener("keydown", (e)=>{
-      if (e.keyCode === 32) { player.emitRays(); }
+      if (e.keyCode === 32) { this.player.emitRays(); }
     });
   }
 
@@ -45,6 +45,14 @@ class GameView {
     }
   }
 
+  playerEscaped(){
+    return this.player.escaped();
+  }
+
+  playerKilled(){
+    //ask map if player collided with monster
+  }
+
   start(){
     //bind key handlers
     this.bindKeyHandlers();
@@ -61,8 +69,18 @@ class GameView {
     this.map.step();
     this.map.draw(this.ctx);
 
-    //request another animation
-    requestAnimationFrame(this.step.bind(this));
+    //request another animation or break if player won / lost
+    if (this.playerEscaped()){
+      if (this.level <= 4) {
+        this.passCallback();
+      } else {
+        this.winningCallback();
+      }
+    } else if (this.playerKilled()){
+      this.losingCallback();
+    } else {
+      requestAnimationFrame(this.step.bind(this));
+    }
 
     // when game is over
     // window.clearInterval(this.intervalId);
@@ -71,12 +89,5 @@ class GameView {
 };
 
 GameView.KEYS = {};
-
-GameView.MOVES = {
-  "up": "U",
-  "down": "D",
-  "left": "L",
-  "right": "R"
-};
 
 module.exports = GameView;

@@ -71,6 +71,8 @@ class Ray {
         this.body.length // set new ray max length
       );
 
+      reflection.monster = this.monster;
+
       this.map.rays.push(reflection);
       console.log(this.map.rays.length);
 
@@ -100,11 +102,6 @@ class Ray {
     this.tail = this.body[0];
   }
 
-  bounce(){
-
-    // this.direction x or y should invert depending on nature of collision
-  }
-
   draw(ctx){
     if (this.body.length === 0) return;
 
@@ -116,12 +113,19 @@ class Ray {
       this.tail.x, this.tail.y
     );
 
-    let headColor = Ray.HEAD_COLOR;
-    if (this.age > Ray.LIFESPAN - 100) { headColor = Ray.FADING_HEAD_COLOR; }
-    if (this.age > Ray.LIFESPAN - 20) { headColor = Ray.FADED_HEAD_COLOR; }
+    this.colors = (this.monster) ? Ray.MONSTER_COLORS : Ray.COLORS;
+    let headColor = this.colors.HEAD_COLOR;
+
+    if (this.age > Ray.LIFESPAN - 100) {
+      headColor = this.colors.FADING_HEAD_COLOR;
+    }
+
+    if (this.age > Ray.LIFESPAN - 20) {
+      headColor = this.colors.FADED_HEAD_COLOR;
+    }
 
     grad.addColorStop(0, headColor);
-    grad.addColorStop(1, Ray.TAIL_COLOR);
+    grad.addColorStop(1, this.colors.TAIL_COLOR);
 
     ctx.strokeStyle = grad;
 
@@ -134,11 +138,21 @@ class Ray {
 };
 
 Ray.MAX_LENGTH = 60;
-Ray.HEAD_COLOR = "#fff";
-Ray.FADING_HEAD_COLOR = "#aaa";
-Ray.FADED_HEAD_COLOR = "#7f7f7f";
-Ray.TAIL_COLOR = "#222";
-Ray.VELOCITY = 1.5;
+Ray.COLORS = {
+  HEAD_COLOR: "#fff",
+  FADING_HEAD_COLOR: "#aaa",
+  FADED_HEAD_COLOR: "#7f7f7f",
+  TAIL_COLOR: "#222"
+};
+
+Ray.MONSTER_COLORS = {
+  HEAD_COLOR: "#F00",
+  FADING_HEAD_COLOR: "#a55",
+  FADED_HEAD_COLOR: "#7f2222",
+  TAIL_COLOR: "#222"
+};
+
+Ray.VELOCITY = 2;
 Ray.LIFESPAN = 200;
 Ray.THICKNESS = 1;
 
@@ -166,8 +180,6 @@ Ray.DIRECTIONS = [
   [-sin15,cos15],
   [sin15,-cos15],
   [-sin15,-cos15],
-
 ];
-
 
 module.exports = Ray;

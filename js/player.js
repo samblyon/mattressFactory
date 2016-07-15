@@ -11,8 +11,14 @@ class Player {
     const newX = this.pos.x + (Player.MOVES[direction][0] * Player.SPEED)
     const newY = this.pos.y + (Player.MOVES[direction][1] * Player.SPEED)
     const exploreCoord = new Coord(newX, newY);
+    const exploreCoordTopLeft = new Coord(newX - 4, newY - 4);
+    const exploreCoordBottomRight = new Coord(newX + 4, newY + 4);
 
-    if (this.map.collidingWithWall(exploreCoord)) return;
+    if (
+      this.map.collidingWithWall(exploreCoordTopLeft) ||
+      this.map.collidingWithWall(exploreCoordBottomRight)
+    ) { return; }
+
     this.pos = exploreCoord;
     // this.emitRays();
   }
@@ -31,11 +37,15 @@ class Player {
     ctx.fillStyle = "#fff";
     ctx.fillRect(this.pos.x, this.pos.y, 4, 4);
   }
+
+  escaped(){
+    return !this.map.inBounds(this.pos);
+  }
 };
 
 const rt2oTwo = Math.sqrt(2)/2;
 
-Player.SPEED = 5;
+Player.SPEED = 1.3;
 Player.MOVES = {
   "U": [0, -1],
   "D": [0, 1],

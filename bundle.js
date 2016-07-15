@@ -53,17 +53,46 @@
 	
 	  const canvas = document.getElementById('canvas');
 	  canvas.width = window.innerWidth - 20;
-	  canvas.height = window.innerHeight - 20;
+	  canvas.height = window.innerHeight - 60;
 	  const ctx = canvas.getContext("2d");
 	  ctx.fillStyle = "#222";
 	  ctx.fillRect(0, 0, canvas.width, canvas.height);
 	});
 	
+	let level = 1;
+	
+	function pass(){
+	  const levelSplash = document.getElementById('level-splash');
+	  const victoryLine = document.getElementById('level-victory');
+	  victoryLine.innerHTML = `YOU HAVE BEATEN LEVEL ${level}`;
+	  levelSplash.style.visibility = "visible";
+	  level += 1;
+	  document.addEventListener("keydown", hideSplash);
+	}
+	
+	function win(){
+	  const winSplash = document.getElementById('win-splash');
+	  const victoryLine = document.getElementById('level-victory');
+	  victoryLine.innerHTML = `YOU HAVE BEATEN LEVEL ${level}`;
+	  winSplash.style.visibility = "visible";
+	  level = 1;
+	  setTimeout( () => {
+	    document.addEventListener("keydown", hideSplash)
+	  }, 2000);
+	}
+	
+	function lose(){
+	  const loseSplash = document.getElementById('lose-splash');
+	  loseSplash.style.visibility = "visible";
+	  document.addEventListener("keydown", hideSplash);
+	}
+	
 	function hideSplash(){
-	  const splash = document.getElementById('splash');
-	  splash.style.visibility = "hidden";
-	  const map = new Map();
-	  window.GameView = new GameView(canvas, map);
+	  const splashes = document.querySelectorAll('.splash');
+	  for (let splash of splashes) {
+	    splash.style.visibility = "hidden";
+	  }
+	  window.GameView = new GameView(canvas, pass, lose, win, level);
 	  window.GameView.start();
 	  document.removeEventListener("keydown", hideSplash);
 	}
@@ -89,26 +118,26 @@
 	const Map = __webpack_require__(3);
 	
 	class GameView {
-	  constructor(canvas, map){
+	  constructor(canvas, passCallback, losingCallback, winningCallback, level){
 	    this.canvas = canvas;
 	    this.ctx = canvas.getContext("2d");
-	    this.map = new Map(canvas);
+	    this.map = new Map(canvas, level);
 	    this.player = this.map.player;
+	    this.winningCallback = winningCallback;
+	    this.losingCallback = losingCallback;
 	  }
 	
 	  bindKeyHandlers() {
 	    window.addEventListener("keydown", (e) => {
-	      console.log("keydown");
 	      GameView.KEYS[e.keyCode] = true;
 	    });
 	
 	    window.addEventListener("keyup", (e) => {
-	      console.log("keyup");
 	      GameView.KEYS[e.keyCode] = false;
 	    });
 	
 	    window.addEventListener("keydown", (e)=>{
-	      if (e.keyCode === 32) { player.emitRays(); }
+	      if (e.keyCode === 32) { this.player.emitRays(); }
 	    });
 	  }
 	
@@ -133,6 +162,14 @@
 	    }
 	  }
 	
+	  playerEscaped(){
+	    return this.player.escaped();
+	  }
+	
+	  playerKilled(){
+	    //ask map if player collided with monster
+	  }
+	
 	  start(){
 	    //bind key handlers
 	    this.bindKeyHandlers();
@@ -149,8 +186,18 @@
 	    this.map.step();
 	    this.map.draw(this.ctx);
 	
-	    //request another animation
-	    requestAnimationFrame(this.step.bind(this));
+	    //request another animation or break if player won / lost
+	    if (this.playerEscaped()){
+	      if (this.level <= 4) {
+	        this.passCallback();
+	      } else {
+	        this.winningCallback();
+	      }
+	    } else if (this.playerKilled()){
+	      this.losingCallback();
+	    } else {
+	      requestAnimationFrame(this.step.bind(this));
+	    }
 	
 	    // when game is over
 	    // window.clearInterval(this.intervalId);
@@ -159,13 +206,6 @@
 	};
 	
 	GameView.KEYS = {};
-	
-	GameView.MOVES = {
-	  "up": "U",
-	  "down": "D",
-	  "left": "L",
-	  "right": "R"
-	};
 	
 	module.exports = GameView;
 
@@ -179,15 +219,39 @@
 	const Util = __webpack_require__(6);
 	const Wall = __webpack_require__(7);
 	const Player = __webpack_require__(8);
+	const Monster = __webpack_require__(9);
 	
 	class Map {
-	  constructor(canvas){
-	    const pegCoord = new Coord(20, 20);
-	    const dirCoord = new Coord(1, 2);
-	    const testRay = new Ray(pegCoord, dirCoord, this);
+	  constructor(canvas, level){
 	    window.rays = this.rays = [];
-	    this.walls = Map.LEVELS[1].map(info => new Wall(...info));
-	    window.player = this.player = new Player(20, 20, this);
+	    this.level = Map.LEVELS[3];  //change back to level variable
+	    this.walls = this.level["walls"]
+	                  .map(row => {
+	                    return row.map((scalar, index) => {
+	                      if (index % 2 === 0) {
+	                        return scalar * canvas.width;
+	                      } else {
+	                        return scalar * canvas.height;
+	                      }
+	                    });
+	                  })
+	                  .map(info => new Wall(...info));
+	    this.player = new Player(
+	      this.level.playerStart.x * canvas.width,
+	      this.level.playerStart.y * canvas.height,
+	      this
+	    );
+	
+	    this.monsters = [];
+	    if (this.level.monsters) {
+	      window.monsters = this.monsters = this.level.monsters.map( monsterStart => {
+	        return new Monster(
+	          monsterStart.x * canvas.width,
+	          monsterStart.y * canvas.height,
+	          this
+	        );
+	      });
+	    }
 	    this.canvas = canvas;
 	  }
 	
@@ -202,6 +266,13 @@
 	    });
 	  }
 	
+	  inBounds(coord){
+	    return !(
+	      (coord.x < 0) || (coord.y < 0)
+	      || (coord.x > canvas.width) || (coord.y > canvas.height)
+	    );
+	  }
+	
 	  cullRays(){
 	    this.rays = this.rays.filter(ray => {
 	      return ray.age < Ray.LIFESPAN;
@@ -214,9 +285,16 @@
 	    }
 	  }
 	
+	  moveMonsters(){
+	    for (let monster of this.monsters) {
+	      monster.move();
+	    }
+	  }
+	
 	  step(){
 	    this.cullRays();
 	    this.moveRays();
+	    this.moveMonsters();
 	  }
 	
 	  draw(ctx){
@@ -228,18 +306,105 @@
 	
 	//make relative sizes so can scale
 	Map.LEVELS = {
-	  1: [
-	      [0, 0, 1, .05],
-	      [0, 0, .05, 1],
-	      [.95, 0, 1, 1],
-	      [1, 390, 370, 399],
-	      [50, 200, 200, 210],
-	      [100, 100, 110, 200],
-	      [200, 40, 210, 100],
-	      [200, 60, 320, 70],
-	      [260, 70, 270, 300]
+	  1: {
+	    walls: [
+	              [0, 0, 0.01, 1],
+	              [0, 0.35, 0.75, 0.4],
+	              [0, 0.6, 0.6, 0.65],
+	              [0.7, 0.35, 0.75, 1],
+	              [0.55, 0.65, 0.6, 1]
+	            ],
+	    playerStart: {x: .05, y: .47}
+	  },
+	  2: {
+	    walls: [
+	            [0.35, 0, 0.5, 0.05],
+	            [0.35, 0, 0.4, 0.3],
+	            [0.5, 0, 0.55, 0.3],
+	            [0, .25, .35, .3],
+	            [.25, .3, .3, .35],
+	            [0, .35, .3, .4],
+	            [.15, .4, .2, .55],
+	            [.2, .5, .3, .55],
+	            [.25, .55, .3, .6],
+	            [.25, .6, .4, .65],
+	            [.35, .65, .4, .7],
+	            [.35, .4, .5, .5],
+	            [.4, .67, .6, .7],
+	            [.55, .25, .6, .3],
+	            [.6, .15, .8, .2],
+	            [.6, .2, .65, .4],
+	            [.5, .4, .65, .45],
+	            [.8, .15, .85, .4],
+	            [.7, .4, 1, .45],
+	            [.78, .45, .8, .5],
+	            [.63, .55, .95, .57],
+	            [.6, .52, .64, .54],
+	            [.99, .45, 1, .5],
+	            [.6, .7, .61, 1],
+	            [.8, .65, .81, .9],
+	            [.61, .99, 1, 1],
+	            [.9, .57, .91, 1],
+	            [.91, .65, 1, .73]
+	    ],
+	    playerStart: {x: .45, y: .07}
+	  },
+	  3: {
+	    walls: [
+	              [0, 0, 0.01, 1],
+	              [0, 0.35, 0.75, 0.4],
+	              [0, 0.6, 0.6, 0.65],
+	              [0.7, 0.35, 0.75, 1],
+	              [0.55, 0.65, 0.6, 1]
+	            ],
+	    playerStart: {x: .1, y: .47},
+	    monsters: [
+	      {x: .06, y: .27},
+	      {x: .06, y: .87}
 	    ]
+	  },
+	  4: {
+	    walls: [
+	      [0.35, 0, 0.5, 0.05],
+	      [0.35, 0, 0.4, 0.3],
+	      [0.5, 0, 0.55, 0.3],
+	      [0, .25, .35, .3],
+	      [.25, .3, .3, .35],
+	      [0, .35, .3, .4],
+	      [.15, .4, .2, .55],
+	      [.2, .5, .3, .55],
+	      [.25, .55, .3, .6],
+	      [.25, .6, .4, .65],
+	      [.35, .65, .4, .7],
+	      [.35, .4, .5, .5],
+	      [.4, .67, .6, .7],
+	      [.55, .25, .6, .3],
+	      [.6, .15, .8, .2],
+	      [.6, .2, .65, .4],
+	      [.5, .4, .65, .45],
+	      [.8, .15, .85, .4],
+	      [.7, .4, 1, .45],
+	      [.78, .45, .8, .5],
+	      [.63, .55, .95, .57],
+	      [.6, .52, .64, .54],
+	      [.99, .45, 1, .5],
+	      [.6, .7, .61, 1],
+	      [.8, .65, .81, .9],
+	      [.61, .99, 1, 1],
+	      [.9, .57, .91, 1],
+	      [.91, .65, 1, .73]
+	    ],
+	    playerStart: {x: .45, y: .07},
+	    monsters: [
+	        {x: .85, y: .9}
+	    ]
+	  },
 	}
+	
+	// Map.PLAYER_STARTS = {
+	//   1: {x: .05, y: .47},
+	//   2: {x: .45, y: .07}
+	// }
 	
 	module.exports = Map;
 
@@ -359,6 +524,8 @@
 	        this.body.length // set new ray max length
 	      );
 	
+	      reflection.monster = this.monster;
+	
 	      this.map.rays.push(reflection);
 	      console.log(this.map.rays.length);
 	
@@ -388,11 +555,6 @@
 	    this.tail = this.body[0];
 	  }
 	
-	  bounce(){
-	
-	    // this.direction x or y should invert depending on nature of collision
-	  }
-	
 	  draw(ctx){
 	    if (this.body.length === 0) return;
 	
@@ -404,12 +566,19 @@
 	      this.tail.x, this.tail.y
 	    );
 	
-	    let headColor = Ray.HEAD_COLOR;
-	    if (this.age > Ray.LIFESPAN - 100) { headColor = Ray.FADING_HEAD_COLOR; }
-	    if (this.age > Ray.LIFESPAN - 20) { headColor = Ray.FADED_HEAD_COLOR; }
+	    this.colors = (this.monster) ? Ray.MONSTER_COLORS : Ray.COLORS;
+	    let headColor = this.colors.HEAD_COLOR;
+	
+	    if (this.age > Ray.LIFESPAN - 100) {
+	      headColor = this.colors.FADING_HEAD_COLOR;
+	    }
+	
+	    if (this.age > Ray.LIFESPAN - 20) {
+	      headColor = this.colors.FADED_HEAD_COLOR;
+	    }
 	
 	    grad.addColorStop(0, headColor);
-	    grad.addColorStop(1, Ray.TAIL_COLOR);
+	    grad.addColorStop(1, this.colors.TAIL_COLOR);
 	
 	    ctx.strokeStyle = grad;
 	
@@ -422,11 +591,21 @@
 	};
 	
 	Ray.MAX_LENGTH = 60;
-	Ray.HEAD_COLOR = "#fff";
-	Ray.FADING_HEAD_COLOR = "#aaa";
-	Ray.FADED_HEAD_COLOR = "#7f7f7f";
-	Ray.TAIL_COLOR = "#222";
-	Ray.VELOCITY = 1.5;
+	Ray.COLORS = {
+	  HEAD_COLOR: "#fff",
+	  FADING_HEAD_COLOR: "#aaa",
+	  FADED_HEAD_COLOR: "#7f7f7f",
+	  TAIL_COLOR: "#222"
+	};
+	
+	Ray.MONSTER_COLORS = {
+	  HEAD_COLOR: "#F00",
+	  FADING_HEAD_COLOR: "#a55",
+	  FADED_HEAD_COLOR: "#7f2222",
+	  TAIL_COLOR: "#222"
+	};
+	
+	Ray.VELOCITY = 2;
 	Ray.LIFESPAN = 200;
 	Ray.THICKNESS = 1;
 	
@@ -454,9 +633,7 @@
 	  [-sin15,cos15],
 	  [sin15,-cos15],
 	  [-sin15,-cos15],
-	
 	];
-	
 	
 	module.exports = Ray;
 
@@ -500,7 +677,7 @@
 	  }
 	
 	  draw(ctx){
-	    ctx.fillStyle = "#222";
+	    ctx.fillStyle = "#222"; 
 	    ctx.fillRect(this.topLeft.x, this.topLeft.y, this.width, this.height);
 	  }
 	}
@@ -525,8 +702,14 @@
 	    const newX = this.pos.x + (Player.MOVES[direction][0] * Player.SPEED)
 	    const newY = this.pos.y + (Player.MOVES[direction][1] * Player.SPEED)
 	    const exploreCoord = new Coord(newX, newY);
+	    const exploreCoordTopLeft = new Coord(newX - 4, newY - 4);
+	    const exploreCoordBottomRight = new Coord(newX + 4, newY + 4);
 	
-	    if (this.map.collidingWithWall(exploreCoord)) return;
+	    if (
+	      this.map.collidingWithWall(exploreCoordTopLeft) ||
+	      this.map.collidingWithWall(exploreCoordBottomRight)
+	    ) { return; }
+	
 	    this.pos = exploreCoord;
 	    // this.emitRays();
 	  }
@@ -545,11 +728,15 @@
 	    ctx.fillStyle = "#fff";
 	    ctx.fillRect(this.pos.x, this.pos.y, 4, 4);
 	  }
+	
+	  escaped(){
+	    return !this.map.inBounds(this.pos);
+	  }
 	};
 	
 	const rt2oTwo = Math.sqrt(2)/2;
 	
-	Player.SPEED = 5;
+	Player.SPEED = 1.3;
 	Player.MOVES = {
 	  "U": [0, -1],
 	  "D": [0, 1],
@@ -562,6 +749,88 @@
 	}
 	
 	module.exports = Player;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	const Coord = __webpack_require__(4);
+	const Ray = __webpack_require__(5);
+	
+	class Monster {
+	  constructor(startX, startY, map){
+	    this.pos = new Coord(startX, startY);
+	    this.map = map;
+	    this.active = false;
+	    this.activate();
+	  }
+	
+	  emitRays(){
+	    const newRays = Ray.DIRECTIONS.map(dir => {
+	      let dirVector = new Coord(dir[0], dir[1]);
+	      let ray = new Ray(this.pos, dirVector, this.map);
+	      ray.monster = true;
+	      return ray;
+	    });
+	    newRays.forEach( ray => {
+	      this.map.rays.push(ray);
+	    });
+	  }
+	
+	  currentCourse(){
+	    const vector = [
+	      this.map.player.pos.x - this.pos.x,
+	      this.map.player.pos.y - this.pos.y
+	    ];
+	
+	    const magnitude = Math.sqrt(
+	      Math.pow(vector[0], 2) + Math.pow(vector[1], 2)
+	    );
+	
+	    const unitVector = vector.map(coordinate => {
+	      return coordinate / magnitude;
+	    });
+	
+	    return new Coord(unitVector[0], unitVector[1]);
+	  }
+	
+	  activate(){
+	    this.active = true;
+	    this.emitInterval = setInterval( () => { this.emitRays() }, 300);
+	  }
+	
+	  move(){
+	    if (this.active) {
+	      const dir = this.currentCourse();
+	      const newX = this.pos.x + (dir.x * Monster.SPEED)
+	      const newY = this.pos.y + (dir.y * Monster.SPEED)
+	      let exploreCoord = new Coord(newX, newY);
+	
+	      if (this.map.collidingWithWall(exploreCoord)) {
+	        exploreCoord = new Coord(
+	          this.pos.x + (dir.x * Monster.SPEED),
+	          this.pos.y
+	        )
+	        if (this.map.collidingWithWall(exploreCoord)){
+	          exploreCoord = new Coord(
+	            this.pos.x,
+	            this.pos.y + (dir.y * Monster.SPEED)
+	          )
+	        } if (this.map.collidingWithWall(exploreCoord)) {
+	          return;
+	        }
+	      }
+	
+	      this.pos = exploreCoord;
+	    }
+	
+	  }
+	};
+	
+	Monster.SPEED = 3;
+	
+	module.exports = Monster;
 
 
 /***/ }

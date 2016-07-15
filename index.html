@@ -8,13 +8,43 @@
     <style></style>
   </head>
   <body>
+    <header>
+      <h1 class="title">ESCAPE FROM THE MATTRESS FACTORY</h1>
+      <h2>AN ECHOLOCATION GAME<h2>
+    </header>
     <div class="game-area">
       <div id="splash" class="splash">
         <div class="splash-text">
+          <h1 class="level"></h1><br><br>
+          <h2>ESCAPE USING ONLY SOUND TO GUIDE YOU</h2><br><br>
+          <h2>ARROW KEYS TO MOVE</h2><br><br>
+          <h2>PRESS SPACE TO CLAP</h2><br><br>
+          <h2>AVOID BEING EATEN, IF POSSIBLE</h2><br><br>
+          <h2>PRESS ANY KEY TO BEGIN</h2>
+        </div>
+      </div>
+      <div id="lose-splash" class="splash lose-splash">
+        <div class="splash-text">
+          <h1 class="level"></h1>
+          <h2>YOU HAVE BEEN CONSUMED BY THE DEMONS OF THE DARK</h2>
+          <h3>THAT SAID... LIFE IS ABOUT LEARNING<h3>
+          <p>PRESS ANY KEY TO TRY LEVEL AGAIN</p>
+        </div>
+      </div>
+      <div id="level-splash" class="splash level-splash">
+        <div class="splash-text">
+          <h2 id="level-victory"></h2>
+          <h3>BUT HMMM...  WHAT'S THIS...? SOMETHING IS... DIFFERENT.<h3>
+          <p>PRESS ANY KEY TO ADVANCE TO THE NEXT FACTORY FLOOR</p>
+        </div>
+      </div>
+      <div id="win-splash" class="splash win-splash">
+        <div class="splash-text">
           <h1>ESCAPE FROM THE MATTRESS FACTORY</h1>
-        AN ECHOLOCATION GAME
-        ESCAPE USING ONLY THE SOUND OF YOUR FOOTSTEPS
-        AVOID BEING EATEN, IF POSSIBLE</div>
+          <h2>YOU ARE VICTORIOUS IN YOUR BRILLIANT ESCAPE</h2>
+          <h3>THAT SAID YOU COULD DO IT FASTER<h3>
+          <p>PRESS ANY KEY TO PLAY AGAIN<p>
+        </div>
       </div>
       <canvas id="canvas"></canvas>
     </div>
