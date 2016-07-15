@@ -74,14 +74,12 @@ class GameView {
 
     //request another animation or break if player won / lost
     if (this.playerEscaped()){
-      if (this.level <= 4) {
+      if (this.level <= 5) {
         this.passCallback();
       } else {
-        debugger;
         this.winningCallback();
       }
     } else if (this.playerKilled()){
-      debugger;
       this.losingCallback();
     } else {
       requestAnimationFrame(this.step.bind(this));

@@ -67,7 +67,9 @@
 	  victoryLine.innerHTML = `YOU HAVE BEATEN LEVEL ${level}`;
 	  levelSplash.style.visibility = "visible";
 	  level += 1;
-	  document.addEventListener("keydown", hideSplash);
+	  setTimeout( () => {
+	    document.addEventListener("keydown", hideSplash)
+	  }, 2000);
 	}
 	
 	function win(){
@@ -84,7 +86,9 @@
 	function lose(){
 	  const loseSplash = document.getElementById('lose-splash');
 	  loseSplash.style.visibility = "visible";
-	  document.addEventListener("keydown", hideSplash);
+	  setTimeout( () => {
+	    document.addEventListener("keydown", hideSplash)
+	  }, 2000);
 	}
 	
 	function hideSplash(){
@@ -191,14 +195,12 @@
 	
 	    //request another animation or break if player won / lost
 	    if (this.playerEscaped()){
-	      if (this.level <= 4) {
+	      if (this.level <= 5) {
 	        this.passCallback();
 	      } else {
-	        debugger;
 	        this.winningCallback();
 	      }
 	    } else if (this.playerKilled()){
-	      debugger;
 	      this.losingCallback();
 	    } else {
 	      requestAnimationFrame(this.step.bind(this));
@@ -224,8 +226,8 @@
 	
 	class Map {
 	  constructor(canvas, level){
-	    window.rays = this.rays = [];
-	    this.level = Map.LEVELS[4];  //change back to level variable
+	    this.rays = [];
+	    this.level = Map.LEVELS[level];  //change back to level variable
 	    this.walls = this.level["walls"]
 	                  .map(row => {
 	                    return row.map((scalar, index) => {
@@ -237,7 +239,7 @@
 	                    });
 	                  })
 	                  .map(info => new Wall(...info));
-	    this.player = new Player(
+	    window.player = this.player = new Player(
 	      this.level.playerStart.x * canvas.width,
 	      this.level.playerStart.y * canvas.height,
 	      this
@@ -245,11 +247,12 @@
 	
 	    this.monsters = [];
 	    if (this.level.monsters) {
-	      window.monsters = this.monsters = this.level.monsters.map( monsterStart => {
+	      this.monsters = this.level.monsters.map( monsterStart => {
 	        return new Monster(
 	          monsterStart.x * canvas.width,
 	          monsterStart.y * canvas.height,
-	          this
+	          this,
+	          monsterStart.active
 	        );
 	      });
 	    }
@@ -278,6 +281,9 @@
 	    this.rays = this.rays.filter(ray => {
 	      return ray.age < Ray.LIFESPAN;
 	    });
+	    // if (this.rays.length > 900) {
+	    //   this.rays = this.rays.slice(300);
+	    // }
 	  }
 	
 	  moveRays(){
@@ -293,8 +299,8 @@
 	  }
 	
 	  playerKilled(){
-	    debugger;
 	    return this.monsters.some(monster => {
+	      if (!monster.active) { return; }
 	      return monster.pos.equals(this.player.pos);
 	    });
 	  }
@@ -347,7 +353,6 @@
 	            [.7, .4, 1, .45],
 	            [.78, .45, .8, .5],
 	            [.63, .55, .95, .57],
-	            [.6, .52, .64, .54],
 	            [.99, .45, 1, .5],
 	            [.6, .7, .61, 1],
 	            [.8, .65, .81, .9],
@@ -367,11 +372,38 @@
 	            ],
 	    playerStart: {x: .1, y: .47},
 	    monsters: [
-	      {x: .06, y: .27},
-	      {x: .06, y: .87}
+	      {x: .06, y: .27, active: true},
+	      {x: .06, y: .87, active: true}
 	    ]
 	  },
 	  4: {
+	    walls: [
+	              [0, 0, 0.01, 1],
+	              [0, 0.35, 0.75, 0.4],
+	              [0, 0.6, 0.6, 0.65],
+	              [0.7, 0.35, 0.75, 1],
+	              [0.55, 0.65, 0.6, 1]
+	            ],
+	    playerStart: {x: .1, y: .47},
+	    monsters: [
+	      {x: .06, y: .45}
+	    ]
+	  },
+	  5: {
+	    walls: [
+	      [0, 0, 1, 0.01],
+	      [0, 0, 0.01, 1],
+	      [0, .99, 1, 1],
+	      [.95, 0, 1, .45],
+	      [.95, .55, 1, 1]
+	    ],
+	    playerStart: {x: .05, y: .5},
+	    monsters: [
+	      {x: .05, y: .05},
+	      {x: .05, y: .95}
+	    ]
+	  },
+	  6: {
 	    walls: [
 	      [0.35, 0, 0.5, 0.05],
 	      [0.35, 0, 0.4, 0.3],
@@ -394,7 +426,7 @@
 	      [.7, .4, 1, .45],
 	      [.78, .45, .8, .5],
 	      [.63, .55, .95, .57],
-	      [.6, .52, .64, .54],
+	      [.7, .72, .74, .74],
 	      [.99, .45, 1, .5],
 	      [.6, .7, .61, 1],
 	      [.8, .65, .81, .9],
@@ -404,15 +436,11 @@
 	    ],
 	    playerStart: {x: .45, y: .07},
 	    monsters: [
-	        {x: .85, y: .9}
+	        {x: .21, y: .45}
 	    ]
 	  },
 	}
 	
-	// Map.PLAYER_STARTS = {
-	//   1: {x: .05, y: .47},
-	//   2: {x: .45, y: .07}
-	// }
 	
 	module.exports = Map;
 
@@ -428,8 +456,8 @@
 	  }
 	
 	  equals(otherCoord){
-	    return (this.x === otherCoord.x)
-	      && (this.y === otherCoord.y)
+	    return (Math.abs(Math.floor(this.x) - Math.floor(otherCoord.x)) < 3)
+	      && (Math.abs(Math.floor(this.y) - Math.floor(otherCoord.y)) < 3)
 	  }
 	
 	  getAdjacentCoords(){
@@ -551,7 +579,20 @@
 	    const newX = this.head.x + (this.direction.x * this.speed);
 	    const newY = this.head.y + (this.direction.y * this.speed);
 	    this.head = new Coord(newX, newY);
-	    this.body.push(this.head); // collision logic could be added before this push
+	    this.body.push(this.head);
+	
+	    //wake monsters if ray hits 'em
+	    let sleepingMonsters = [];
+	    if (this.map.monsters) {
+	      sleepingMonsters = this.map.monsters.filter((monster)=>{
+	        return !monster.active;
+	      });
+	      for (let sleepingMonster of sleepingMonsters) {
+	        if (sleepingMonster.pos.equals(this.head)) {
+	          sleepingMonster.activate();
+	        }
+	      }
+	    }
 	  }
 	
 	  fadeTail(){
@@ -748,7 +789,7 @@
 	
 	const rt2oTwo = Math.sqrt(2)/2;
 	
-	Player.SPEED = 1.3;
+	Player.SPEED = 1.5;
 	Player.MOVES = {
 	  "U": [0, -1],
 	  "D": [0, 1],
@@ -771,11 +812,10 @@
 	const Ray = __webpack_require__(5);
 	
 	class Monster {
-	  constructor(startX, startY, map){
+	  constructor(startX, startY, map, active){
 	    this.pos = new Coord(startX, startY);
 	    this.map = map;
-	    this.active = false;
-	    this.activate();
+	    if (active) { this.activate(); }
 	  }
 	
 	  emitRays(){
@@ -809,7 +849,8 @@
 	
 	  activate(){
 	    this.active = true;
-	    this.emitInterval = setInterval( () => { this.emitRays() }, 300);
+	    this.emitRays();
+	    this.emitInterval = setInterval( () => { this.emitRays() }, 400);
 	  }
 	
 	  move(){
@@ -840,7 +881,7 @@
 	  }
 	};
 	
-	Monster.SPEED = 3;
+	Monster.SPEED = 1.5;
 	
 	module.exports = Monster;
 

@@ -5,8 +5,8 @@ class Coord {
   }
 
   equals(otherCoord){
-    return (this.x === otherCoord.x)
-      && (this.y === otherCoord.y)
+    return (Math.abs(Math.floor(this.x) - Math.floor(otherCoord.x)) < 3)
+      && (Math.abs(Math.floor(this.y) - Math.floor(otherCoord.y)) < 3)
   }
 
   getAdjacentCoords(){

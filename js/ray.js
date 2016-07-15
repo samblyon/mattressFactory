@@ -90,7 +90,20 @@ class Ray {
     const newX = this.head.x + (this.direction.x * this.speed);
     const newY = this.head.y + (this.direction.y * this.speed);
     this.head = new Coord(newX, newY);
-    this.body.push(this.head); // collision logic could be added before this push
+    this.body.push(this.head);
+
+    //wake monsters if ray hits 'em
+    let sleepingMonsters = [];
+    if (this.map.monsters) {
+      sleepingMonsters = this.map.monsters.filter((monster)=>{
+        return !monster.active;
+      });
+      for (let sleepingMonster of sleepingMonsters) {
+        if (sleepingMonster.pos.equals(this.head)) {
+          sleepingMonster.activate();
+        }
+      }
+    }
   }
 
   fadeTail(){

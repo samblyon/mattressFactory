@@ -21,7 +21,9 @@ function pass(){
   victoryLine.innerHTML = `YOU HAVE BEATEN LEVEL ${level}`;
   levelSplash.style.visibility = "visible";
   level += 1;
-  document.addEventListener("keydown", hideSplash);
+  setTimeout( () => {
+    document.addEventListener("keydown", hideSplash)
+  }, 2000);
 }
 
 function win(){
@@ -38,7 +40,9 @@ function win(){
 function lose(){
   const loseSplash = document.getElementById('lose-splash');
   loseSplash.style.visibility = "visible";
-  document.addEventListener("keydown", hideSplash);
+  setTimeout( () => {
+    document.addEventListener("keydown", hideSplash)
+  }, 2000);
 }
 
 function hideSplash(){

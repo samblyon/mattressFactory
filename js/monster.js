@@ -2,11 +2,10 @@ const Coord = require('./coord');
 const Ray = require('./ray');
 
 class Monster {
-  constructor(startX, startY, map){
+  constructor(startX, startY, map, active){
     this.pos = new Coord(startX, startY);
     this.map = map;
-    this.active = false;
-    this.activate();
+    if (active) { this.activate(); }
   }
 
   emitRays(){
@@ -40,7 +39,8 @@ class Monster {
 
   activate(){
     this.active = true;
-    this.emitInterval = setInterval( () => { this.emitRays() }, 300);
+    this.emitRays();
+    this.emitInterval = setInterval( () => { this.emitRays() }, 400);
   }
 
   move(){
@@ -71,6 +71,6 @@ class Monster {
   }
 };
 
-Monster.SPEED = 3;
+Monster.SPEED = 1.5;
 
 module.exports = Monster;

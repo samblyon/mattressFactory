@@ -7,8 +7,8 @@ const Monster = require('./monster');
 
 class Map {
   constructor(canvas, level){
-    window.rays = this.rays = [];
-    this.level = Map.LEVELS[4];  //change back to level variable
+    this.rays = [];
+    this.level = Map.LEVELS[level];  //change back to level variable
     this.walls = this.level["walls"]
                   .map(row => {
                     return row.map((scalar, index) => {
@@ -20,7 +20,7 @@ class Map {
                     });
                   })
                   .map(info => new Wall(...info));
-    this.player = new Player(
+    window.player = this.player = new Player(
       this.level.playerStart.x * canvas.width,
       this.level.playerStart.y * canvas.height,
       this
@@ -28,11 +28,12 @@ class Map {
 
     this.monsters = [];
     if (this.level.monsters) {
-      window.monsters = this.monsters = this.level.monsters.map( monsterStart => {
+      this.monsters = this.level.monsters.map( monsterStart => {
         return new Monster(
           monsterStart.x * canvas.width,
           monsterStart.y * canvas.height,
-          this
+          this,
+          monsterStart.active
         );
       });
     }
@@ -61,6 +62,9 @@ class Map {
     this.rays = this.rays.filter(ray => {
       return ray.age < Ray.LIFESPAN;
     });
+    // if (this.rays.length > 900) {
+    //   this.rays = this.rays.slice(300);
+    // }
   }
 
   moveRays(){
@@ -76,8 +80,8 @@ class Map {
   }
 
   playerKilled(){
-    debugger;
     return this.monsters.some(monster => {
+      if (!monster.active) { return; }
       return monster.pos.equals(this.player.pos);
     });
   }
@@ -130,7 +134,6 @@ Map.LEVELS = {
             [.7, .4, 1, .45],
             [.78, .45, .8, .5],
             [.63, .55, .95, .57],
-            [.6, .52, .64, .54],
             [.99, .45, 1, .5],
             [.6, .7, .61, 1],
             [.8, .65, .81, .9],
@@ -150,11 +153,38 @@ Map.LEVELS = {
             ],
     playerStart: {x: .1, y: .47},
     monsters: [
-      {x: .06, y: .27},
-      {x: .06, y: .87}
+      {x: .06, y: .27, active: true},
+      {x: .06, y: .87, active: true}
     ]
   },
   4: {
+    walls: [
+              [0, 0, 0.01, 1],
+              [0, 0.35, 0.75, 0.4],
+              [0, 0.6, 0.6, 0.65],
+              [0.7, 0.35, 0.75, 1],
+              [0.55, 0.65, 0.6, 1]
+            ],
+    playerStart: {x: .1, y: .47},
+    monsters: [
+      {x: .06, y: .45}
+    ]
+  },
+  5: {
+    walls: [
+      [0, 0, 1, 0.01],
+      [0, 0, 0.01, 1],
+      [0, .99, 1, 1],
+      [.95, 0, 1, .45],
+      [.95, .55, 1, 1]
+    ],
+    playerStart: {x: .05, y: .5},
+    monsters: [
+      {x: .05, y: .05},
+      {x: .05, y: .95}
+    ]
+  },
+  6: {
     walls: [
       [0.35, 0, 0.5, 0.05],
       [0.35, 0, 0.4, 0.3],
@@ -177,7 +207,7 @@ Map.LEVELS = {
       [.7, .4, 1, .45],
       [.78, .45, .8, .5],
       [.63, .55, .95, .57],
-      [.6, .52, .64, .54],
+      [.7, .72, .74, .74],
       [.99, .45, 1, .5],
       [.6, .7, .61, 1],
       [.8, .65, .81, .9],
@@ -187,14 +217,10 @@ Map.LEVELS = {
     ],
     playerStart: {x: .45, y: .07},
     monsters: [
-        {x: .85, y: .9}
+        {x: .21, y: .45}
     ]
   },
 }
 
-// Map.PLAYER_STARTS = {
-//   1: {x: .05, y: .47},
-//   2: {x: .45, y: .07}
-// }
 
 module.exports = Map;

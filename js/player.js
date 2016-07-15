@@ -49,7 +49,7 @@ class Player {
 
 const rt2oTwo = Math.sqrt(2)/2;
 
-Player.SPEED = 1.3;
+Player.SPEED = 1.5;
 Player.MOVES = {
   "U": [0, -1],
   "D": [0, 1],
