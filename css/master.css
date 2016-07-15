@@ -4,6 +4,19 @@ body, h1, h2, h3, header, p, a {
   font-family: sans-serif;
 }
 
+.nav-list {
+  padding-right: 20px;
+}
+
+a {
+  color: #ccc;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #222;
+}
+
 .game-area {
   position: relative;
   margin: 0 auto;

@@ -281,9 +281,7 @@
 	    this.rays = this.rays.filter(ray => {
 	      return ray.age < Ray.LIFESPAN;
 	    });
-	    // if (this.rays.length > 900) {
-	    //   this.rays = this.rays.slice(300);
-	    // }
+	
 	  }
 	
 	  moveRays(){
@@ -399,8 +397,10 @@
 	    ],
 	    playerStart: {x: .05, y: .5},
 	    monsters: [
-	      {x: .05, y: .05},
-	      {x: .05, y: .95}
+	      {x: .05, y: .15},
+	      {x: .05, y: .85},
+	      {x: .55, y: .35},
+	      {x: .55, y: .75}
 	    ]
 	  },
 	  6: {
