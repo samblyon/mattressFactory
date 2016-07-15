@@ -62,9 +62,7 @@ class Map {
     this.rays = this.rays.filter(ray => {
       return ray.age < Ray.LIFESPAN;
     });
-    // if (this.rays.length > 900) {
-    //   this.rays = this.rays.slice(300);
-    // }
+
   }
 
   moveRays(){
