@@ -170,6 +170,7 @@
 	
 	  playerKilled(){
 	    //ask map if player collided with monster
+	    return this.map.playerKilled();
 	  }
 	
 	  start(){
@@ -193,18 +194,16 @@
 	      if (this.level <= 4) {
 	        this.passCallback();
 	      } else {
+	        debugger;
 	        this.winningCallback();
 	      }
 	    } else if (this.playerKilled()){
+	      debugger;
 	      this.losingCallback();
 	    } else {
 	      requestAnimationFrame(this.step.bind(this));
 	    }
-	
-	    // when game is over
-	    // window.clearInterval(this.intervalId);
 	  }
-	
 	};
 	
 	GameView.KEYS = {};
@@ -226,7 +225,7 @@
 	class Map {
 	  constructor(canvas, level){
 	    window.rays = this.rays = [];
-	    this.level = Map.LEVELS[level];  //change back to level variable
+	    this.level = Map.LEVELS[4];  //change back to level variable
 	    this.walls = this.level["walls"]
 	                  .map(row => {
 	                    return row.map((scalar, index) => {
@@ -291,6 +290,13 @@
 	    for (let monster of this.monsters) {
 	      monster.move();
 	    }
+	  }
+	
+	  playerKilled(){
+	    debugger;
+	    return this.monsters.some(monster => {
+	      return monster.pos.equals(this.player.pos);
+	    });
 	  }
 	
 	  step(){
@@ -705,10 +711,14 @@
 	    const newY = this.pos.y + (Player.MOVES[direction][1] * Player.SPEED)
 	    const exploreCoord = new Coord(newX, newY);
 	    const exploreCoordTopLeft = new Coord(newX - 4, newY - 4);
+	    const exploreCoordBottomLeft = new Coord(newX - 4, newY + 4);
+	    const exploreCoordTopRight = new Coord(newX + 4, newY - 4);
 	    const exploreCoordBottomRight = new Coord(newX + 4, newY + 4);
 	
 	    if (
 	      this.map.collidingWithWall(exploreCoordTopLeft) ||
+	      this.map.collidingWithWall(exploreCoordBottomLeft) ||
+	      this.map.collidingWithWall(exploreCoordTopRight) ||
 	      this.map.collidingWithWall(exploreCoordBottomRight)
 	    ) { return; }
 	

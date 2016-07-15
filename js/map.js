@@ -8,7 +8,7 @@ const Monster = require('./monster');
 class Map {
   constructor(canvas, level){
     window.rays = this.rays = [];
-    this.level = Map.LEVELS[level];  //change back to level variable
+    this.level = Map.LEVELS[4];  //change back to level variable
     this.walls = this.level["walls"]
                   .map(row => {
                     return row.map((scalar, index) => {
@@ -73,6 +73,13 @@ class Map {
     for (let monster of this.monsters) {
       monster.move();
     }
+  }
+
+  playerKilled(){
+    debugger;
+    return this.monsters.some(monster => {
+      return monster.pos.equals(this.player.pos);
+    });
   }
 
   step(){

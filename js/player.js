@@ -12,10 +12,14 @@ class Player {
     const newY = this.pos.y + (Player.MOVES[direction][1] * Player.SPEED)
     const exploreCoord = new Coord(newX, newY);
     const exploreCoordTopLeft = new Coord(newX - 4, newY - 4);
+    const exploreCoordBottomLeft = new Coord(newX - 4, newY + 4);
+    const exploreCoordTopRight = new Coord(newX + 4, newY - 4);
     const exploreCoordBottomRight = new Coord(newX + 4, newY + 4);
 
     if (
       this.map.collidingWithWall(exploreCoordTopLeft) ||
+      this.map.collidingWithWall(exploreCoordBottomLeft) ||
+      this.map.collidingWithWall(exploreCoordTopRight) ||
       this.map.collidingWithWall(exploreCoordBottomRight)
     ) { return; }
 

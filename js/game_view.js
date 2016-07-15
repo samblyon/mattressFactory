@@ -53,6 +53,7 @@ class GameView {
 
   playerKilled(){
     //ask map if player collided with monster
+    return this.map.playerKilled();
   }
 
   start(){
@@ -76,18 +77,16 @@ class GameView {
       if (this.level <= 4) {
         this.passCallback();
       } else {
+        debugger;
         this.winningCallback();
       }
     } else if (this.playerKilled()){
+      debugger;
       this.losingCallback();
     } else {
       requestAnimationFrame(this.step.bind(this));
     }
-
-    // when game is over
-    // window.clearInterval(this.intervalId);
   }
-
 };
 
 GameView.KEYS = {};
