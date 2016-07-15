@@ -123,8 +123,10 @@
 	    this.ctx = canvas.getContext("2d");
 	    this.map = new Map(canvas, level);
 	    this.player = this.map.player;
+	    this.passCallback = passCallback;
 	    this.winningCallback = winningCallback;
 	    this.losingCallback = losingCallback;
+	    this.level = level;
 	  }
 	
 	  bindKeyHandlers() {
@@ -224,7 +226,7 @@
 	class Map {
 	  constructor(canvas, level){
 	    window.rays = this.rays = [];
-	    this.level = Map.LEVELS[3];  //change back to level variable
+	    this.level = Map.LEVELS[level];  //change back to level variable
 	    this.walls = this.level["walls"]
 	                  .map(row => {
 	                    return row.map((scalar, index) => {
