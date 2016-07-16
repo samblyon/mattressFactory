@@ -149,8 +149,8 @@ If a pursuer is unable to move directly toward the player, it follows the player
 ### Auto generation of levels
 Hand made levels take forever, so I plan to look into random generation algorithms (e.g. Conways Game of Life) to produce level maps.
 
-### Better AI
-The computer will do stupid things right now like follow the player to the right even if the best way to get the player is to go left. The next step here is to switch the computer players over to a maze solving algorithm (e.g. BF tree traversal). I'm holding on this at the moment because the game is hard enough as it is.
+### Maze Solving AI
+The computer will do stupid things right now like follow the player to the right even if the best way to get the player is to go left. The next step here is to switch the computer players over to a maze solving algorithm (e.g. BF tree traversal).
 
 ### Ray rendering performance
 Currently canvas performance begins to degrade when the number of rays approaches 900--not uncommon during fitful traipses across factory floors on levels 3-6.
