@@ -92,7 +92,7 @@ Result:
 3. `Rays` represent different kinds of sound. I chose to display different sound origins with different colors.
 
 ### Movement
-Unnamable, non-player characters in the game move relative to the player's location, computed as a unit vector. However, if during a character's `#move` method it is unable to move directly toward the player, it moves toward them in whatever axis is unobstructed. Characters follow the current player using unit-vector logic:
+Unnamable, non-player characters in the game move relative to the player's location, computed as a unit vector. Characters follow the current player using unit-vector logic:
 
 ```javascript
   currentCourse(){
@@ -113,10 +113,44 @@ Unnamable, non-player characters in the game move relative to the player's locat
   }
 ```
 
+If a pursuer is unable to move directly toward the player, it follows the player along any unobstructed axis. 
+
+```javascript
+  move(){
+    if (this.active) {
+      const dir = this.currentCourse();
+      const newX = this.pos.x + (dir.x * Monster.SPEED)
+      const newY = this.pos.y + (dir.y * Monster.SPEED)
+      let exploreCoord = new Coord(newX, newY);
+
+      if (this.map.collidingWithWall(exploreCoord)) {
+        exploreCoord = new Coord(
+          this.pos.x + (dir.x * Monster.SPEED),
+          this.pos.y
+        )
+        if (this.map.collidingWithWall(exploreCoord)){
+          exploreCoord = new Coord(
+            this.pos.x,
+            this.pos.y + (dir.y * Monster.SPEED)
+          )
+        } if (this.map.collidingWithWall(exploreCoord)) {
+          return;
+        }
+      }
+
+      this.pos = exploreCoord;
+    }
+  }
+};
+```
+
 ## Future Improvements
 
-### Additional levels and additional materials
-Goes without saying.
+### Auto generation of levels
+Hand made levels take forever, so I plan to look into random generation algorithms (e.g. Conways Game of Life) to produce level maps.
+
+### Better AI
+The computer will do stupid things right now like follow the player to the right even if the best way to get the player is to go left. The next step here is to switch the computer players over to a maze solving algorithm (e.g. BF tree traversal). I'm holding on this at the moment because the game is hard enough as it is.
 
 ### Ray rendering performance
 Currently canvas performance begins to degrade when the number of rays approaches 900--not uncommon during fitful traipses across factory floors on levels 3-6.
