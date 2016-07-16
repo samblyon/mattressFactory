@@ -92,7 +92,26 @@ Result:
 3. `Rays` represent different kinds of sound. I chose to display different sound origins with different colors.
 
 ### Movement
-Unnamable, non-player characters in the game move relative to the player's location, computed as a unit vector. However, if during a character's `#move` method it is unable to move directly toward the player, it moves toward them in whatever axis is unobstructed.
+Unnamable, non-player characters in the game move relative to the player's location, computed as a unit vector. However, if during a character's `#move` method it is unable to move directly toward the player, it moves toward them in whatever axis is unobstructed. Characters follow the current player using unit-vector logic:
+
+```javascript
+  currentCourse(){
+    const vector = [
+      this.map.player.pos.x - this.pos.x,
+      this.map.player.pos.y - this.pos.y
+    ];
+
+    const magnitude = Math.sqrt(
+      Math.pow(vector[0], 2) + Math.pow(vector[1], 2)
+    );
+
+    const unitVector = vector.map(coordinate => {
+      return coordinate / magnitude;
+    });
+
+    return new Coord(unitVector[0], unitVector[1]);
+  }
+```
 
 ## Future Improvements
 
