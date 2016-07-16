@@ -1,13 +1,13 @@
 # Escape from the Mattress Factory
 A browser based echolocation game. Integrates an object-oriented Javascript game structure with the smooth rendering of HTML5 canvas to create an unusual and curious experience.
 
-[play here](samblyon.github.io/mattressFactory)
+[play here](https://samblyon.github.io/mattressFactory)
 
 ![screenshot](./docs/screenshots/monster_attack.png)
 
 ## Gameplay
 
-A massive power outage has struck the eerie industrial complex, leaving you a chance at last to break for freedom. Use sound waves to navigate darkened factory floors in your bid to escape, avoiding obstacles and searching for an elusive exit.
+A massive power outage has struck the eerie industrial complex, leaving you a chance to break for freedom. Use sound waves to navigate darkened factory floors in your bid to escape, avoiding obstacles and searching for an elusive exit.
 
 In the darkness, the factory seems empty... or is it?
 
@@ -58,7 +58,7 @@ Map.LEVELS = {
 ### Displaying Sound
 Players see sound as `Rays`. To be realistic, rays must fade away with time, reflect off of surfaces, and represent the objects that produce them. I approached these challenges in the following ways:
 
-1. To give rays finite energy, they limited by a length parameter `this.maxLength`, and a lifespan parameter `age`. Each render, `length` and `age` are incremented and compared to the `Ray::LIFESPAN` and `Ray.MAX_LENGTH` constants to determine if they should be faded out. Fading out is achieved via `ctx#createLinearGradient`:
+* Rays are limited by a length parameter `this.maxLength`, and a lifespan parameter `age`. On each render, `length` and `age` are incremented and compared to the `Ray::LIFESPAN` and `Ray.MAX_LENGTH` constants to determine if the ray should be faded out. Fading out is achieved via `ctx#createLinearGradient`:
 ```javascript
   // ray.js
 
@@ -72,7 +72,7 @@ Players see sound as `Rays`. To be realistic, rays must fade away with time, ref
   }
 ```
 
-2. `Rays` bounce! When rays collide with other objects, a new child ray is created to represent the reflection. At each step, the current ray is assessed for collision by exploring outward on each axis of the ray's intended next location and calling `Map#collidingWithWall`. The `direction` of the ray is inverted depending on the direction of collision, and the reflection 'age' is advanced to the `age` of the parent ray so it will fade when its parent would have.
+* `Rays` bounce! When rays collide with other objects, a new child ray is created to represent the reflection. At each step, the current ray is assessed for collision by exploring outward on each axis of the ray's intended next location and calling `Map#collidingWithWall`. The `direction` of the ray is inverted depending on the direction of collision, and the reflection 'age' is advanced to the `age` of the parent ray so it will fade when its parent would have.
 ```javascript
   // ray.js
 
@@ -89,12 +89,14 @@ Players see sound as `Rays`. To be realistic, rays must fade away with time, ref
 ```
 Result:
 
-3. `Rays` represent different kinds of sound. I chose to display different sound origins with different colors.
+* `Rays` represent different kinds of sound. Different sound origins are represented by different colors.
 
 ### Movement
-Unnamable, non-player characters in the game move relative to the player's location, computed as a unit vector. Characters follow the current player using unit-vector logic:
+Once awoken, monsters move relative to the player's location, computed as a unit vector.
 
 ```javascript
+  // monster.js
+
   currentCourse(){
     const vector = [
       this.map.player.pos.x - this.pos.x,
@@ -113,9 +115,11 @@ Unnamable, non-player characters in the game move relative to the player's locat
   }
 ```
 
-If a pursuer is unable to move directly toward the player, it follows the player along any unobstructed axis. 
+If a monster is unable to move directly toward the player, it follows the player along any unobstructed axis. 
 
 ```javascript
+//monster.js
+
   move(){
     if (this.active) {
       const dir = this.currentCourse();
