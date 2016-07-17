@@ -12,7 +12,7 @@ module.exports = {
       ],
       playerStart: {x: .05, y: .47},
       level_header: "BUT HMMM...  WHAT'S THIS...?",
-      level_header_2: "THE NEXT FLOOR IS HUGE! I'LL NEED TO CLAP MUCH MORE TO FIND MY WAY..."
+      level_header_2: "THE NEXT FLOOR IS HUGE! YOU'LL NEED TO CLAP MUCH MORE TO FIND MY WAY..."
     },
     2: {
       walls: [
