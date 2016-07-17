@@ -4,6 +4,11 @@ body, h1, h2, h3, header, p, a {
   font-family: sans-serif;
 }
 
+body {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
 .nav-list {
   padding-right: 20px;
 }
@@ -32,15 +37,27 @@ a:hover {
 }
 
 .splash-text {
-  width: 30%;
+  width: 50%;
   font-family: sans-serif;
   padding: 10px;
   margin: 0 auto;
+
+  h2 {
+    margin: 5px;
+  }
+
+  h3 {
+    text-align: left;
+    margin: 5px;
+  }
 }
 
 .lose-splash, .win-splash, .level-splash {
   visibility: hidden;
   background: #222;
+  transition: .15s all;
+  display: flex;
+  align-items: center;
 }
 
 h1 {
