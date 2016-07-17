@@ -890,7 +890,7 @@
 	        {x: .2, y: .04},
 	        {x: .5, y: .9}
 	      ],
-	      level_header: "DISPAIR. AT THIS RATE YOU'LL NEVER MAKE IT OUT",
+	      level_header: "DESPAIR. AT THIS RATE YOU'LL NEVER MAKE IT OUT",
 	      level_header_2: "BUT WHAT'S THIS... A GUST OF FRESH AIR..? COULD IT BE...?"
 	    },
 	    6: {
