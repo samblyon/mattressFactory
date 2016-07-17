@@ -12,7 +12,7 @@ module.exports = {
       ],
       playerStart: {x: .05, y: .47},
       level_header: "BUT HMMM...  WHAT'S THIS...?",
-      level_header_2: "THE NEXT FLOOR IS HUGE! I'LL NEED TO CLAP MUCH MORE TO FIND MY WAY..."
+      level_header_2: "THE NEXT FLOOR IS HUGE! YOU'LL NEED TO CLAP MUCH MORE TO FIND MY WAY..."
     },
     2: {
       walls: [
@@ -80,8 +80,8 @@ module.exports = {
     },
     5: {
       walls: [
-        [0, 0, .21, 0.1],
-        [.27, 0, 1, 0.1],
+        [0, 0, .18, 0.1],
+        [.25, 0, 1, 0.1],
         [.1, .18, .14, .22],
         [.2, .18, .45, .22],
         [.1, 0, .14, .4],
@@ -103,10 +103,11 @@ module.exports = {
       ],
       playerStart: {x: .05, y: .5},
       monsters: [
-        {x: .05, y: .25},
+        // {x: .05, y: .25},
         {x: .85, y: .15},
-        {x: .15, y: .24},
-        {x: .95, y: .24}
+        {x: .15, y: .22},
+        {x: .2, y: .04},
+        {x: .5, y: .9}
       ],
       level_header: "DISPAIR. AT THIS RATE YOU'LL NEVER MAKE IT OUT",
       level_header_2: "BUT WHAT'S THIS... A GUST OF FRESH AIR..? COULD IT BE...?"
