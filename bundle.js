@@ -237,7 +237,7 @@
 	class Map {
 	  constructor(canvas, level){
 	    this.rays = [];
-	    this.level = GameConstants.LEVELS[5];  //change back to level variable
+	    this.level = GameConstants.LEVELS[level];  //change back to level variable
 	    this.walls = this.level["walls"]
 	                  .map(row => {
 	                    return row.map((scalar, index) => {
