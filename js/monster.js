@@ -9,7 +9,7 @@ class Monster {
   }
 
   emitRays(){
-    const newRays = Ray.DIRECTIONS.map(dir => {
+    const newRays = Ray.unitVectors(32).map(dir => {
       let dirVector = new Coord(dir[0], dir[1]);
       let ray = new Ray(this.pos, dirVector, this.map);
       ray.monster = true;

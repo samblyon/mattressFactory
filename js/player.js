@@ -28,7 +28,7 @@ class Player {
   }
 
   emitRays(){
-    const newRays = Ray.DIRECTIONS.map(dir => {
+    const newRays = Ray.unitVectors().map(dir => {
       let dirVector = new Coord(dir[0], dir[1]);
       return new Ray(this.pos, dirVector, this.map);
     });

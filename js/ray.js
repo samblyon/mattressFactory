@@ -1,7 +1,7 @@
 const Coord = require('./coord');
 
 class Ray {
-  constructor(origin, direction, map, age, maxLength){
+  constructor(origin, direction, map, age, maxLength, fading){
     this.body = [origin];  //origin is coord object
     this.head = origin;
     this.tail = origin;
@@ -11,8 +11,8 @@ class Ray {
     this.speed = Ray.VELOCITY;
 
     this.age = (age) ? age : Math.random(20);
-    this.maxLength =  Ray.MAX_LENGTH + Math.random(20); //(maxLength) ? maxLength :
-    this.fading = false;
+    this.maxLength = Ray.MAX_LENGTH + Math.random(20); //(maxLength) ? maxLength :
+    this.fading = (fading) ? fading : false;
   }
 
   move(){
@@ -22,11 +22,11 @@ class Ray {
       }
     // }
 
-    if (this.body.length > this.maxLength){
+    if (this.age > Ray.LIFESPAN*0.50){
       this.fading = true;
     }
 
-    if (this.fading) {
+    if (this.body.length > Ray.MAX_LENGTH) {
       this.fadeTail()
     }
 
@@ -67,8 +67,9 @@ class Ray {
         origin,
         reflectionDirection,
         this.map,
-        this.age,        // advance new ray age to parent ray current age
-        this.body.length // set new ray max length
+        this.age + 20,        // advance new ray age to parent ray current age
+        this.body.length, // set new ray max length
+        this.fading
       );
 
       reflection.monster = this.monster;
@@ -129,11 +130,11 @@ class Ray {
     this.colors = (this.monster) ? Ray.MONSTER_COLORS : Ray.COLORS;
     let headColor = this.colors.HEAD_COLOR;
 
-    if (this.age > Ray.LIFESPAN - 100) {
+    if (this.age > Ray.LIFESPAN * 0.5) {
       headColor = this.colors.FADING_HEAD_COLOR;
     }
 
-    if (this.age > Ray.LIFESPAN - 20) {
+    if (this.age > Ray.LIFESPAN * 0.9) {
       headColor = this.colors.FADED_HEAD_COLOR;
     }
 
@@ -150,7 +151,6 @@ class Ray {
   }
 };
 
-Ray.MAX_LENGTH = 60;
 Ray.COLORS = {
   HEAD_COLOR: "#fff",
   FADING_HEAD_COLOR: "#aaa",
@@ -166,33 +166,30 @@ Ray.MONSTER_COLORS = {
 };
 
 Ray.VELOCITY = 2;
-Ray.LIFESPAN = 200;
+Ray.LIFESPAN = 100;
 Ray.THICKNESS = 1;
+Ray.MAX_LENGTH = 10;
 
-const rt3oTwo = Math.sqrt(3)/2;
-const cos15 = Math.cos((15/180) * Math.PI);
-const sin15 = Math.sin((15/180) * Math.PI);
-Ray.DIRECTIONS = [
-  [0, 1],
-  [0, -1],
-  [-1, 0],
-  [1, 0],
-  [1/2, rt3oTwo],
-  [1/2, -rt3oTwo],
-  [-1/2, rt3oTwo],
-  [-1/2, -rt3oTwo],
-  [rt3oTwo, 1/2],
-  [-rt3oTwo, 1/2],
-  [rt3oTwo, -1/2],
-  [-rt3oTwo, -1/2],
-  [cos15,sin15],
-  [-cos15,sin15],
-  [cos15,-sin15],
-  [-cos15,-sin15],
-  [sin15,cos15],
-  [-sin15,cos15],
-  [sin15,-cos15],
-  [-sin15,-cos15],
-];
+
+Ray.unitVectors = (rayCount) => {
+
+  if (rayCount==undefined) {
+    rayCount = 360;
+  }
+  const rads = [];
+
+  let rad = Math.random()*2 * Math.PI / rayCount;
+  while (rad < Math.PI*2) {
+    // console.log(rad)
+    rads.push(rad);
+    rad += 2 * Math.PI / rayCount;
+  }
+  console.log(rads)
+
+  return rads.map(rad => [
+    Math.cos(rad),
+    Math.sin(rad)
+  ]);
+}
 
 module.exports = Ray;
