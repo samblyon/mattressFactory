@@ -8,7 +8,7 @@ class Ray {
     this.map = map;
 
     this.direction = direction; //direction is coord object
-    this.speed = Ray.VELOCITY;
+    this.speed = Ray.VELOCITY*(1+(Math.random()-0.5)*0.1);
 
     this.age = (age) ? age : Math.random(20);
     this.maxLength = Ray.MAX_LENGTH + Math.random(20); //(maxLength) ? maxLength :
@@ -22,7 +22,7 @@ class Ray {
       }
     // }
 
-    if (this.age > Ray.LIFESPAN*0.50){
+    if (this.age > Ray.LIFESPAN*0.10){
       this.fading = true;
     }
 
@@ -93,6 +93,8 @@ class Ray {
     this.head = new Coord(newX, newY);
     this.body.push(this.head);
 
+    this.speed*=0.99;
+
     //wake monsters if ray hits 'em
     let sleepingMonsters = [];
     if (this.map.monsters) {
@@ -134,7 +136,7 @@ class Ray {
       headColor = this.colors.FADING_HEAD_COLOR;
     }
 
-    if (this.age > Ray.LIFESPAN * 0.9) {
+    if (this.age > Ray.LIFESPAN * 0.99) {
       headColor = this.colors.FADED_HEAD_COLOR;
     }
 
@@ -165,8 +167,8 @@ Ray.MONSTER_COLORS = {
   TAIL_COLOR: "#222"
 };
 
-Ray.VELOCITY = 2;
-Ray.LIFESPAN = 100;
+Ray.VELOCITY = 4;
+Ray.LIFESPAN = 50;
 Ray.THICKNESS = 1;
 Ray.MAX_LENGTH = 10;
 
@@ -180,7 +182,6 @@ Ray.unitVectors = (rayCount) => {
 
   let rad = Math.random()*2 * Math.PI / rayCount;
   while (rad < Math.PI*2) {
-    // console.log(rad)
     rads.push(rad);
     rad += 2 * Math.PI / rayCount;
   }
